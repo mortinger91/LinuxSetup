@@ -31,6 +31,9 @@ else
 
 	su -c "usermod -a -G sudo ${userName}"
 
+	# Right now NOPASSWD is on ALL which is not ideal (but still quite convenient).
+	# Change it to something like this to include only some commands:
+	# NOPASSWD:/usr/bin/apt update, /usr/bin/apt upgrade
 	su -c "echo \"${userName} ALL=(ALL:ALL) NOPASSWD: ALL\" | tee /etc/sudoers.d/${userName}"
 
 fi
