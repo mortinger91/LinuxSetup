@@ -12,7 +12,7 @@ then
 	DISTRO="Manjaro"
 else
 	echo "Detected Debian"
-	PKG_MANAGER="sudo apt install -y"
+	PKG_MANAGER="sudo apt update; sudo apt install -y"
 	DISTRO="Debian"
 fi
 
@@ -35,6 +35,9 @@ else
 	# Change it to something like this to include only some commands:
 	# NOPASSWD:/usr/bin/apt update, /usr/bin/apt upgrade
 	su -c "echo \"${userName} ALL=(ALL:ALL) NOPASSWD: ALL\" | tee /etc/sudoers.d/${userName}"
+
+	echo "Open a new shell, relaunch the script and skip sudo configuration"
+	exit
 
 fi
 
@@ -208,16 +211,23 @@ if [ "$answer" == "${answer#[Yy]}" ]
 then
 	echo "    Skipping useful packages"
 else
-	if [ "$DISTRO" == "Debian" ]
+if [ "$DISTRO" == "Debian" ]
 	then
 		# Debian packages
-		${PKG_MANAGER} apt-transport-https apt-utils bear build-tools clang curl dnsutils fonts-firacode gcc g++ gdb git git-gui git-lfs gitk gnome-keyring gnupg gzip htop libreoffice lldb llvm net-tools openssl python3 tlp ssh sshfs ssl-cert unzip nmap
+		${PKG_MANAGER} apt-transport-https apt-utils bear build-tools clang cmake curl dnsutils fonts-firacode gcc g++ gdb git git-gui git-lfs gitk gnome-keyring gnupg gzip htop libreoffice lldb llvm net-tools network-manager-openvpn openssl python3 tlp ssh sshfs ssl-cert wget unzip nmap
+
+		# Visual Studio Code installation
+		wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+		sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
+		sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
+		rm -f packages.microsoft.gpg
+		${PKG_MANAGER} code
 	else
 		# Manjaro packages
 		${PKG_MANAGER} git dnsutils
 	fi
 
-fi 
+fi
 
 
 # Section 5
@@ -257,7 +267,7 @@ else
 
 	# Configuring git lfs
 	git lfs install
-fi
+fi 
 
 
 echo "New Linux installation setup completed, rebooting is recommended"
