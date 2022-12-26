@@ -248,7 +248,9 @@ else
 	git config --global credential.helper store
 	git config --global pull.ff only
 	git config --global pull.rebase false
-	git config --global init.defaultBranch master
+	echo "Insert git default branch name:"
+	read default
+	git config --global init.defaultBranch $default
 	echo "Do you want to setup git signing (y/n)?"
 	read answer
 	if [ "$answer" == "${answer#[Nn]}" ]
