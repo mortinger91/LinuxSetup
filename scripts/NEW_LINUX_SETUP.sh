@@ -68,7 +68,16 @@ else
 			sudo apt update
 	fi
 
-	${PKG_MANAGER} libinput-tools libinput-gestures xdotool
+	${PKG_MANAGER} make wmctrl libinput-tools xdotool
+
+	# libinput-gestures
+	mkdir ~/temp
+	cd ~/temp
+	git clone https://github.com/bulletmark/libinput-gestures.git
+	cd libinput-gestures
+	sudo make install 
+	# or "sudo ./libinput-gestures-setup install"
+	libinput-gestures-setup stop desktop autostart start
 
 	mkdir ~/.config >/dev/null 2>&1
 
@@ -185,7 +194,7 @@ else
 	myrc="${myrc}\n# Add directories to the PATH"
 	myrc="${myrc}\n# Example: export PATH=/usr/lib/jvm/java-11-openjdk-amd64/bin:\$PATH"
 	myrc="${myrc}\n"
-	myrc="${myrc}\n# export PATH=/newdir:\$PATH"
+	myrc="${myrc}\n export PATH=/home/m/.cargo/bin:\$PATH"
 	myrc="${myrc}\n"
 
 	touch ~/.bashrc
@@ -233,14 +242,48 @@ if [ "$DISTRO" == "Debian" ]
 		sudo apt update
 
 		# Debian packages
-		${PKG_MANAGER} apt-transport-https apt-utils bear build-tools clang cmake curl dnsutils fonts-firacode gcc g++ gdb git git-gui git-lfs gitk gnome-keyring gnupg gzip htop libreoffice lldb llvm net-tools network-manager-openvpn openssl python3 tlp ssh sshfs ssl-cert wget unzip nmap \
-		firmware-iwlwifi
+		${PKG_MANAGER} apt-transport-https 
+		${PKG_MANAGER} apt-utils 
+		${PKG_MANAGER} bear 
+		${PKG_MANAGER} build-tools 
+		${PKG_MANAGER} cargo 
+		${PKG_MANAGER} clang 
+		${PKG_MANAGER} cmake 
+		${PKG_MANAGER} curl 
+		${PKG_MANAGER} dnsutils 
+		${PKG_MANAGER} fonts-firacode 
+		${PKG_MANAGER} gcc 
+		${PKG_MANAGER} g++ 
+		${PKG_MANAGER} gdb 
+		${PKG_MANAGER} git 
+		${PKG_MANAGER} git-gui 
+		${PKG_MANAGER} git-lfs 
+		${PKG_MANAGER} gitk 
+		${PKG_MANAGER} gnome-keyring 
+		${PKG_MANAGER} gnupg 
+		${PKG_MANAGER} gzip 
+		${PKG_MANAGER} htop 
+		${PKG_MANAGER} libreoffice 
+		${PKG_MANAGER} lldb 
+		${PKG_MANAGER} llvm 
+		${PKG_MANAGER} net-tools 
+		${PKG_MANAGER} network-manager-openvpn 
+		${PKG_MANAGER} openssl 
+		${PKG_MANAGER} python3 
+		${PKG_MANAGER} tlp 
+		${PKG_MANAGER} ssh 
+		${PKG_MANAGER} sshfs 
+		${PKG_MANAGER} ssl-cert 
+		${PKG_MANAGER} unzip 
+		${PKG_MANAGER} nmap 
+		${PKG_MANAGER} firmware-iwlwifi
 
 		# Visual Studio Code installation
 		wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
 		sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
 		sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
 		rm -f packages.microsoft.gpg
+		sudo apt update
 		${PKG_MANAGER} code
 	else
 		# Manjaro packages
@@ -289,6 +332,9 @@ else
 
 	# Configuring git lfs
 	git lfs install
+
+	# Downloading 1 rust crate
+	cargo install rand
 fi 
 
 
