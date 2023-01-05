@@ -1,4 +1,5 @@
 echo "New Linux installation setup:"
+echo "Run the script as user, not root"
 
 
 # Section 0
@@ -12,7 +13,7 @@ then
 	DISTRO="Manjaro"
 else
 	echo "Detected Debian"
-	PKG_MANAGER="sudo apt update; sudo apt install -y"
+	PKG_MANAGER="sudo apt install -y"
 	DISTRO="Debian"
 fi
 
@@ -29,12 +30,16 @@ then
 	echo "    Skipping sudo"
 else
 
-	su -c "usermod -a -G sudo ${userName}"
+	su -c "/sbin/usermod -a -G sudo ${userName}"
 
 	# Right now NOPASSWD is on ALL which is not ideal (but still quite convenient).
 	# Change it to something like this to include only some commands:
 	# NOPASSWD:/usr/bin/apt update, /usr/bin/apt upgrade
 	su -c "echo \"${userName} ALL=(ALL:ALL) NOPASSWD: ALL\" | tee /etc/sudoers.d/${userName}"
+
+	echo "sudo configuration completed!"
+
+    # Add check that /etc/sudoers.d/${userName} contains the right information
 
 	echo "Open a new shell, relaunch the script and skip sudo configuration"
 	exit
@@ -50,6 +55,11 @@ if [ "$answer" == "${answer#[Yy]}" ]
 then
 	echo "    Skipping touchpad gestures"
 else
+
+	if [ "$DISTRO" == "Debian" ]
+		then
+			sudo apt update
+	fi
 
 	${PKG_MANAGER} libinput-tools libinput-gestures xdotool
 
@@ -213,6 +223,8 @@ then
 else
 if [ "$DISTRO" == "Debian" ]
 	then
+		sudo apt update
+
 		# Debian packages
 		${PKG_MANAGER} apt-transport-https apt-utils bear build-tools clang cmake curl dnsutils fonts-firacode gcc g++ gdb git git-gui git-lfs gitk gnome-keyring gnupg gzip htop libreoffice lldb llvm net-tools network-manager-openvpn openssl python3 tlp ssh sshfs ssl-cert wget unzip nmap \
 		firmware-iwlwifi
