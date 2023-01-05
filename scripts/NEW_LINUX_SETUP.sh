@@ -1,6 +1,13 @@
+# Download it using
+# 1 - su
+# 2 - apt update
+# 3 - apt install wget
+# 4 - wget https://raw.githubusercontent.com/mortinger91/LinuxSetup/master/scripts/NEW_LINUX_SETUP.sh 
+# 5 - chmod +x NEW_LINUX_SETUP.sh
+# 6 - ./NEW_LINUX_SETUP.sh
+
 echo "New Linux installation setup:"
 echo "Run the script as user, not root"
-
 
 # Section 0
 echo "  0 - initial setup:"
