@@ -215,7 +215,7 @@ if [ "$DISTRO" == "Debian" ]
 	then
 		# Debian packages
 		${PKG_MANAGER} apt-transport-https apt-utils bear build-tools clang cmake curl dnsutils fonts-firacode gcc g++ gdb git git-gui git-lfs gitk gnome-keyring gnupg gzip htop libreoffice lldb llvm net-tools network-manager-openvpn openssl python3 tlp ssh sshfs ssl-cert wget unzip nmap \
-		firmware-linux-nonfree
+		firmware-iwlwifi
 
 		# Visual Studio Code installation
 		wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
