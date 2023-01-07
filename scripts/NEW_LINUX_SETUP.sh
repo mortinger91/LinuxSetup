@@ -1,13 +1,16 @@
-# Download it using
-# 1 - su
+# How to download and run this script:
+# 0 - userName=$(whoami)
+# 1 - su -
 # 2 - apt update
 # 3 - apt install wget
-# 4 - wget https://raw.githubusercontent.com/mortinger91/LinuxSetup/master/scripts/NEW_LINUX_SETUP.sh 
+# 4 - su ${userName}
+# 4 - cd ~
+# 5 - wget https://raw.githubusercontent.com/mortinger91/LinuxSetup/master/scripts/NEW_LINUX_SETUP.sh 
 # 5 - chmod +x NEW_LINUX_SETUP.sh
 # 6 - ./NEW_LINUX_SETUP.sh
 
 echo "New Linux installation setup:"
-echo "Run the script as user, not root"
+echo "Run the script as your user, not root"
 
 # Section 0
 echo "  0 - initial setup:"
@@ -16,12 +19,20 @@ echo "  0 - initial setup:"
 if [ sudo apt --version >/dev/null 2>&1 ]
 then
 	echo "Detected Manjaro"
-	PKG_MANAGER="sudo pacman -S --noconfirm"
+	PKG_INSTALL="sudo pacman -S --noconfirm"
 	DISTRO="Manjaro"
 else
 	echo "Detected Debian"
-	PKG_MANAGER="sudo apt install -y"
+	PKG_INSTALL="sudo apt install -y"
 	DISTRO="Debian"
+fi
+
+# Checking if Xorg or Wayland is in use
+if [ "$XDG_SESSION_TYPE" == "x11" ]
+then
+	echo "Xorg in use as expected!"
+else
+	echo "Wayland in use, consider switching to Xorg!"
 fi
 
 userName=$(whoami)
@@ -46,11 +57,10 @@ else
 
 	echo "sudo configuration completed!"
 
-    # Add check that /etc/sudoers.d/${userName} contains the right information
+    # TODO: Add check that /etc/sudoers.d/${userName} exists and is correct
 
 	echo "Open a new shell, relaunch the script and skip sudo configuration"
 	exit
-
 fi
 
 
@@ -62,22 +72,26 @@ if [ "$answer" == "${answer#[Yy]}" ]
 then
 	echo "    Skipping touchpad gestures"
 else
-
 	if [ "$DISTRO" == "Debian" ]
-		then
-			sudo apt update
+	then
+		${PKG_UPDATE}
+		${PKG_INSTALL} make
+
+		# Building libinput-gestures from github
+		mkdir ~/temp
+		cd ~/temp
+		git clone https://github.com/bulletmark/libinput-gestures.git
+		cd libinput-gestures
+		sudo make install 
+		# or "sudo ./libinput-gestures-setup install"
+	else
+		# This package may be available only on AUR
+		${PKG_INSTALL} libinput-gestures
 	fi
 
-	${PKG_MANAGER} make wmctrl libinput-tools xdotool
-
-	# libinput-gestures
-	mkdir ~/temp
-	cd ~/temp
-	git clone https://github.com/bulletmark/libinput-gestures.git
-	cd libinput-gestures
-	sudo make install 
-	# or "sudo ./libinput-gestures-setup install"
-	libinput-gestures-setup stop desktop autostart start
+	${PKG_INSTALL} wmctrl 
+	${PKG_INSTALL} libinput-tools 
+	${PKG_INSTALL} xdotool
 
 	mkdir ~/.config >/dev/null 2>&1
 
@@ -92,9 +106,8 @@ else
 	# check output of these commands:
 	#   libinput-gestures -l
 	#   libinput-gestures-setup status
-	# this can be needed:
+	# this can be needed (run it in the repo folder):
 	#   sudo libinput-gestures-setup install
-
 fi
 
 
@@ -225,7 +238,6 @@ else
 
 	touch ~/.bash_custom_aliases
 	echo -e $myaliases > ~/.bash_custom_aliases
-
 fi
 
 
@@ -239,67 +251,94 @@ then
 else
 if [ "$DISTRO" == "Debian" ]
 	then
-		sudo apt update
+		${PKG_UPDATE}
 
 		# Debian packages
-		${PKG_MANAGER} apt-transport-https 
-		${PKG_MANAGER} apt-utils 
-		${PKG_MANAGER} bear 
-		${PKG_MANAGER} build-tools 
-		${PKG_MANAGER} cargo 
-		${PKG_MANAGER} clang 
-		${PKG_MANAGER} cmake 
-		${PKG_MANAGER} curl 
-		${PKG_MANAGER} dnsutils 
-		${PKG_MANAGER} fonts-firacode 
-		${PKG_MANAGER} gcc 
-		${PKG_MANAGER} g++ 
-		${PKG_MANAGER} gdb 
-		${PKG_MANAGER} git 
-		${PKG_MANAGER} git-gui 
-		${PKG_MANAGER} git-lfs 
-		${PKG_MANAGER} gitk 
-		${PKG_MANAGER} gnome-keyring 
-		${PKG_MANAGER} gnupg 
-		${PKG_MANAGER} gzip 
-		${PKG_MANAGER} htop 
-		${PKG_MANAGER} libreoffice 
-		${PKG_MANAGER} lldb 
-		${PKG_MANAGER} llvm 
-		${PKG_MANAGER} net-tools 
-		${PKG_MANAGER} network-manager-openvpn 
-		${PKG_MANAGER} openssl 
-		${PKG_MANAGER} python3 
-		${PKG_MANAGER} tlp 
-		${PKG_MANAGER} ssh 
-		${PKG_MANAGER} sshfs 
-		${PKG_MANAGER} ssl-cert 
-		${PKG_MANAGER} unzip 
-		${PKG_MANAGER} nmap 
-		${PKG_MANAGER} firmware-iwlwifi
+		${PKG_INSTALL} apt-transport-https 
+		${PKG_INSTALL} apt-utils 
+		${PKG_INSTALL} bear 
+		${PKG_INSTALL} build-tools 
+		${PKG_INSTALL} cargo 
+		${PKG_INSTALL} clang 
+		${PKG_INSTALL} cmake 
+		${PKG_INSTALL} curl 
+		${PKG_INSTALL} dnsutils 
+		${PKG_INSTALL} fonts-firacode 
+		${PKG_INSTALL} gcc 
+		${PKG_INSTALL} g++ 
+		${PKG_INSTALL} gdb 
+		${PKG_INSTALL} git 
+		${PKG_INSTALL} git-gui 
+		${PKG_INSTALL} git-lfs 
+		${PKG_INSTALL} gitk 
+		${PKG_INSTALL} gnome-keyring 
+		${PKG_INSTALL} gnupg 
+		${PKG_INSTALL} gzip 
+		${PKG_INSTALL} htop 
+		${PKG_INSTALL} locales-all
+		${PKG_INSTALL} libreoffice 
+		${PKG_INSTALL} lldb 
+		${PKG_INSTALL} llvm 
+		${PKG_INSTALL} make 
+		${PKG_INSTALL} net-tools 
+		${PKG_INSTALL} network-manager-openvpn 
+		${PKG_INSTALL} openssl 
+		${PKG_INSTALL} python3 
+		${PKG_INSTALL} tlp 
+		${PKG_INSTALL} ssh 
+		${PKG_INSTALL} sshfs 
+		${PKG_INSTALL} ssl-cert 
+		${PKG_INSTALL} unzip 
+		${PKG_INSTALL} nmap 
+		${PKG_INSTALL} firmware-iwlwifi
+		${PKG_INSTALL} telegram-desktop
+		${PKG_INSTALL} lm-sensors
 
-		# Visual Studio Code installation
-		wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
-		sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
-		sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
-		rm -f packages.microsoft.gpg
-		sudo apt update
-		${PKG_MANAGER} code
+		echo "    Install Visual Studio Code (y/n)?"
+		if [ "$answer" == "${answer#[Yy]}" ]
+		then
+			echo "Skipping VSCode"
+		else
+			mkdir ~/temp
+			cd ~/temp
+
+			# Visual Studio Code installation
+			wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+			sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
+			sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
+			rm -f packages.microsoft.gpg
+			${PKG_UPDATE}
+			${PKG_INSTALL} code
+		fi
+
+		echo "    Install Google Chrome (y/n)?"
+		if [ "$answer" == "${answer#[Yy]}" ]
+		then
+			echo "Skipping Google Chrome"
+		else
+			mkdir ~/temp
+			cd ~/temp
+
+			# Google Chrome installation
+			wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+			sudo dpkg -i google-chrome-stable_current_amd64.deb
+		fi
 	else
 		# Manjaro packages
-		${PKG_MANAGER} git dnsutils
+		${PKG_INSTALL} git 
+		${PKG_INSTALL} dnsutils
 	fi
 
 fi
 
 
 # Section 5
-echo "  5 - Perform configuration:"
-echo "    Perform configuration (y/n)?"
+echo "  5 - Perform git configuration:"
+echo "    Perform git configuration (y/n)?"
 read answer
 if [ "$answer" == "${answer#[Yy]}" ]
 then
-	echo "    Skipping configuration"
+	echo "    Skipping git configuration"
 else
 	# Configuring git
 	echo "Insert git user.name:"
@@ -332,10 +371,58 @@ else
 
 	# Configuring git lfs
 	git lfs install
-
-	# Downloading 1 rust crate
-	cargo install rand
 fi 
+
+
+# Section 6
+echo "  6 - Perform KDE configuration:"
+echo "    Perform KDE configuration (y/n)?"
+read answer
+if [ "$answer" == "${answer#[Yy]}" ]
+then
+	echo "    Skipping KDE configuration"
+else
+	# WIDGETS USED:
+	#
+	# System Load Viewer
+	# Thermal Monitor
+
+	# COPY THESE FOLDERS AND FILES IN ORDER TO
+	# HAVE THE SAME CONFIGURATION ACROSS MULTIPLE MACHINES
+	#
+	# ~/.local/share/fonts/*
+	# ~/.local/share/konsole/*
+	# ~/.local/share/kservices5/*
+	# ~/.local/share/kwin/*
+	# ~/.local/share/kxmlgui5/konsole/*
+	# ~/.local/share/kxmlgui5/dolphin/*
+	# ~/.local/share/networkmanagement/*
+	# ~/.local/share/plasma/*
+	# ~/.local/share/TelegramDesktop/*
+	# ~/.cargo/*
+	# ~/.kde/*
+	# ~/Templates/*
+	# ~/.selected_editor
+	# ~/.config/autostart/*
+	# ~/.config/kdedefaults/*
+	# ~/.config/xsettingsd/*
+	# ~/.config/dolphinrc
+	# ~/.config/kmcfonts
+	# ~/.config/kcminputrc
+	# ~/.config/kconf_updaterc
+	# ~/.config/kded5rc
+	# ~/.config/kdeglobals
+	# ~/.config/kdeglobalshortcutsrc
+	# ~/.config/konsolerc
+	# ~/.config/kscreenlockerrc
+	# ~/.config/ktimezonedrc
+	# ~/.config/kwinrc
+	# ~/.config/kwinrulesrc
+	# ~/.config/plasma-localerc
+	# ~/.config/plasma-org.kde.plasma.desktop-appletsrc
+	# ~/.config/powermanagementprofilesrc
+	# ~/.config/touchpadxlibinputrc
+fi
 
 
 echo "New Linux installation setup completed, rebooting is recommended"
@@ -350,8 +437,6 @@ else
 
 fi 
 
-# ALSO PART OF THE CONFIGURATION:
-#	- folder onBoot with script fixKDE e TLP
-#	- binaries autostarted in KDE autolaunch
+# MISSING FROM THE CONFIGURATION:
+#	- settings TLP
 #	- cronjobs
-#	- KDE: theme, settings
