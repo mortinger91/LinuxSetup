@@ -286,6 +286,14 @@ if [ "$DISTRO" == "Debian" ]
 		${PKG_INSTALL} htop 
 		${PKG_INSTALL} locales-all
 		${PKG_INSTALL} libreoffice 
+		# OpenGL development
+		${PKG_INSTALL} libgl1-mesa-dev
+		${PKG_INSTALL} libxcursor-dev
+		${PKG_INSTALL} libxi-dev
+		${PKG_INSTALL} libxinerama-dev
+		${PKG_INSTALL} libxrandr-dev
+		${PKG_INSTALL} libxss-dev
+		# End of OpenGL development
 		${PKG_INSTALL} lldb 
 		${PKG_INSTALL} llvm 
 		${PKG_INSTALL} lm-sensors
