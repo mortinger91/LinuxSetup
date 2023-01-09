@@ -1,12 +1,10 @@
 #####################################################
 # How to download and run this script:
 # 
-# 1 - su -
-# 2 - apt update
-# 3 - apt install wget
-# 4 - su myUser
-# 4 - cd ~
-# 5 - wget https://raw.githubusercontent.com/mortinger91/LinuxSetup/master/scripts/NEW_LINUX_SETUP.sh 
+# 1 - su -c "apt update"
+# 2 - su -c "apt install wget"
+# 3 - cd ~
+# 4 - wget https://raw.githubusercontent.com/mortinger91/LinuxSetup/master/scripts/NEW_LINUX_SETUP.sh 
 # 5 - chmod +x NEW_LINUX_SETUP.sh
 # 6 - ./NEW_LINUX_SETUP.sh
 #####################################################
@@ -14,6 +12,12 @@
 
 echo "New Linux installation setup:"
 echo "Run the script as your user, not root"
+echo "Do you want to configure the system (y/n)?"
+read answer
+if [ "$answer" == "${answer#[Yy]}" ]
+then
+	exit
+fi
 
 
 # Section 0
@@ -49,7 +53,7 @@ echo "    Configure sudo (y/n)?"
 read answer
 if [ "$answer" == "${answer#[Yy]}" ]
 then
-	echo "    Skipping sudo"
+	echo -e "    Skipping sudo\n"
 else
 
 	su -c "/sbin/usermod -a -G sudo ${userName}"
@@ -74,7 +78,7 @@ echo "    Configure touchpad gestures (y/n)?"
 read answer
 if [ "$answer" == "${answer#[Yy]}" ]
 then
-	echo "    Skipping touchpad gestures"
+	echo -e "    Skipping touchpad gestures\n"
 else
 	if [ "$DISTRO" == "Debian" ]
 	then
@@ -121,7 +125,7 @@ echo "    Configure .bashrc and .bash_aliases (y/n)?"
 read answer
 if [ "$answer" == "${answer#[Yy]}" ]
 then
-	echo "    Skipping bash"
+	echo -e "    Skipping bash\n"
 else
 
 	# ~/.bashrc file
@@ -251,7 +255,7 @@ echo "    Install useful packages (y/n)?"
 read answer
 if [ "$answer" == "${answer#[Yy]}" ]
 then
-	echo "    Skipping useful packages"
+	echo -e "    Skipping useful packages\n"
 else
 if [ "$DISTRO" == "Debian" ]
 	then
@@ -267,6 +271,7 @@ if [ "$DISTRO" == "Debian" ]
 		${PKG_INSTALL} cmake 
 		${PKG_INSTALL} curl 
 		${PKG_INSTALL} dnsutils 
+		${PKG_INSTALL} firmware-iwlwifi
 		${PKG_INSTALL} fonts-firacode 
 		${PKG_INSTALL} gcc 
 		${PKG_INSTALL} g++ 
@@ -283,22 +288,23 @@ if [ "$DISTRO" == "Debian" ]
 		${PKG_INSTALL} libreoffice 
 		${PKG_INSTALL} lldb 
 		${PKG_INSTALL} llvm 
-		${PKG_INSTALL} make 
+		${PKG_INSTALL} lm-sensors
+		${PKG_INSTALL} nmap 
 		${PKG_INSTALL} net-tools 
 		${PKG_INSTALL} network-manager-openvpn 
+		${PKG_INSTALL} make 
 		${PKG_INSTALL} openssl 
 		${PKG_INSTALL} python3 
+		${PKG_INSTALL} tcpdump 
 		${PKG_INSTALL} tlp 
 		${PKG_INSTALL} ssh 
 		${PKG_INSTALL} sshfs 
 		${PKG_INSTALL} ssl-cert 
-		${PKG_INSTALL} unzip 
-		${PKG_INSTALL} nmap 
-		${PKG_INSTALL} firmware-iwlwifi
 		${PKG_INSTALL} telegram-desktop
-		${PKG_INSTALL} lm-sensors
+		${PKG_INSTALL} unzip 
 
 		echo "    Install Visual Studio Code (y/n)?"
+		read answer
 		if [ "$answer" == "${answer#[Yy]}" ]
 		then
 			echo "Skipping VSCode"
@@ -316,6 +322,7 @@ if [ "$DISTRO" == "Debian" ]
 		fi
 
 		echo "    Install Google Chrome (y/n)?"
+		read answer
 		if [ "$answer" == "${answer#[Yy]}" ]
 		then
 			echo "Skipping Google Chrome"
@@ -326,6 +333,16 @@ if [ "$DISTRO" == "Debian" ]
 			# Google Chrome installation
 			wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 			sudo dpkg -i google-chrome-stable_current_amd64.deb
+		fi
+
+		echo "    Install Wireshark (y/n)?"
+		read answer
+		if [ "$answer" == "${answer#[Yy]}" ]
+		then
+			echo "Skipping Wireshark"
+		else
+			${PKG_INSTALL} wireshark 
+			sudo usermod -a -G wireshark ${userName}
 		fi
 	else
 		# Manjaro packages
@@ -342,7 +359,7 @@ echo "    Perform git configuration (y/n)?"
 read answer
 if [ "$answer" == "${answer#[Yy]}" ]
 then
-	echo "    Skipping git configuration"
+	echo -e "    Skipping git configuration\n"
 else
 	# Configuring git
 	echo "Insert git user.name:"
@@ -384,8 +401,9 @@ echo "    Perform KDE configuration (y/n)?"
 read answer
 if [ "$answer" == "${answer#[Yy]}" ]
 then
-	echo "    Skipping KDE configuration"
+	echo -e "    Skipping KDE configuration\n"
 else
+	echo "    Copying KDE configuration..."
 	# WIDGETS USED:
 	#
 	# System Load Viewer
@@ -426,6 +444,19 @@ else
 	# ~/.config/plasma-org.kde.plasma.desktop-appletsrc
 	# ~/.config/powermanagementprofilesrc
 	# ~/.config/touchpadxlibinputrc
+fi
+
+
+# Section 7
+echo "  7 - Perform grub configuration:"
+echo "    Perform grub configuration (y/n)?"
+read answer
+if [ "$answer" == "${answer#[Yy]}" ]
+then
+	echo -e "    Skipping grub configuration\n"
+else
+	echo -e "#User defined resolution for grub\nGRUB_GFXMODE=640x480\n" | sudo tee -a /etc/default/grub
+	sudo update-grub 
 fi
 
 
