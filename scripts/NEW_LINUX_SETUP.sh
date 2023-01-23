@@ -452,7 +452,11 @@ else
 	# ~/.local/share/kxmlgui5/konsole/*
 	# ~/.local/share/kxmlgui5/dolphin/*
 	# ~/.local/share/networkmanagement/*
-	# ~/.local/share/plasma/*
+	#
+	# This contains the user installed widgets, it is advised to 
+	# download them again in the new system and do not copy this folder
+	# ~/.local/share/plasma/plasmoids/*
+	#
 	# ~/.cargo/*
 	# ~/.kde/*
 	# ~/.config/autostart/*
