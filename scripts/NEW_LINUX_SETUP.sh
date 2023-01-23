@@ -266,10 +266,11 @@ if [ "$DISTRO" == "Debian" ]
 		${PKG_INSTALL} apt-utils 
 		${PKG_INSTALL} bear 
 		${PKG_INSTALL} build-tools 
-		${PKG_INSTALL} cargo 
+		${PKG_INSTALL} ca-certificates 
 		${PKG_INSTALL} clang 
 		${PKG_INSTALL} cmake 
 		${PKG_INSTALL} curl 
+		${PKG_INSTALL} docker 
 		${PKG_INSTALL} dnsutils 
 		${PKG_INSTALL} firmware-iwlwifi
 		${PKG_INSTALL} fonts-firacode 
@@ -294,6 +295,7 @@ if [ "$DISTRO" == "Debian" ]
 		${PKG_INSTALL} libxrandr-dev
 		${PKG_INSTALL} libxss-dev
 		# End of OpenGL development
+		${PKG_INSTALL} lsb-release 
 		${PKG_INSTALL} lldb 
 		${PKG_INSTALL} llvm 
 		${PKG_INSTALL} lm-sensors
@@ -352,6 +354,35 @@ if [ "$DISTRO" == "Debian" ]
 			${PKG_INSTALL} wireshark 
 			sudo usermod -a -G wireshark ${userName}
 		fi
+
+		echo "    Install Rust Toolchain (y/n)?"
+		read answer
+		if [ "$answer" == "${answer#[Yy]}" ]
+		then
+			echo "Skipping Rust Toolchain"
+		else
+			curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+		fi
+
+		echo "    Install Docker (y/n)?"
+		read answer
+		if [ "$answer" == "${answer#[Yy]}" ]
+		then
+			echo "Skipping Docker"
+		else
+			sudo mkdir -p /etc/apt/keyrings
+			curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+			echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian bullseye stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+			# change to bullseye to $(lsb_release -cs) when docker is released for bookworm
+			${PKG_UPDATE}
+			# If update throws an error try this command:
+			# sudo chmod a+r /etc/apt/keyrings/docker.gpg
+			${PKG_INSTALL} docker-ce docker-ce-cli containerd.io docker-compose-plugin
+			sudo groupadd docker
+			sudo usermod -aG docker ${userName}
+			echo "Testing docker installation, reboot to test without sudo"
+			sudo docker run hello-world
+		fi	
 	else
 		# Manjaro packages
 		${PKG_INSTALL} git 
