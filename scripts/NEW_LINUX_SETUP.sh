@@ -443,15 +443,9 @@ then
 	echo -e "    Skipping KDE configuration\n"
 else
 	echo "    Copying KDE configuration..."
-	# WIDGETS USED:
-	#
-	# System Load Viewer
-	# Thermal Monitor
-
 	# COPY THESE FOLDERS AND FILES IN ORDER TO
-	# HAVE THE SAME CONFIGURATION ACROSS MULTIPLE MACHINES
+	# HAVE THE SAME KDE CONFIGURATION ACROSS MULTIPLE MACHINES
 	#
-	# ~/.local/share/fonts/*
 	# ~/.local/share/konsole/*
 	# ~/.local/share/kservices5/*
 	# ~/.local/share/kwin/*
@@ -459,11 +453,8 @@ else
 	# ~/.local/share/kxmlgui5/dolphin/*
 	# ~/.local/share/networkmanagement/*
 	# ~/.local/share/plasma/*
-	# ~/.local/share/TelegramDesktop/*
 	# ~/.cargo/*
 	# ~/.kde/*
-	# ~/Templates/*
-	# ~/.selected_editor
 	# ~/.config/autostart/*
 	# ~/.config/kdedefaults/*
 	# ~/.config/xsettingsd/*
@@ -483,6 +474,18 @@ else
 	# ~/.config/plasma-org.kde.plasma.desktop-appletsrc
 	# ~/.config/powermanagementprofilesrc
 	# ~/.config/touchpadxlibinputrc
+	#
+	#
+	# WIDGETS USED:
+	#
+	# System Load Viewer
+	# Thermal Monitor
+	#
+	# Non-KDE specific 
+	# ~/.local/share/fonts/*
+	# ~/.selected_editor
+	# ~/.local/share/TelegramDesktop/*
+	# ~/Templates/*
 fi
 
 
@@ -511,6 +514,4 @@ else
 
 fi 
 
-# MISSING FROM THE CONFIGURATION:
-#	- settings TLP
-#	- cronjobs
+# Also add scripts from BootScripts repository for a machine specific configuration
