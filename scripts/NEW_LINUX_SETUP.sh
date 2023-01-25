@@ -165,7 +165,7 @@ else
 	myrc="${myrc}\nfi"
 	myrc="${myrc}\n"
 	myrc="${myrc}\n# functions for git branch of the current directory"
-	myrc="${myrc}\ngit_branch_arrow() {"
+	myrc="${myrc}\nfunction git_branch_arrow() {"
 	myrc="${myrc}\n    onGitFolder=\$(git branch 2> /dev/null)"
 	myrc="${myrc}\n    if [[ \$onGitFolder != \"\" ]];"
 	myrc="${myrc}\n    then"
