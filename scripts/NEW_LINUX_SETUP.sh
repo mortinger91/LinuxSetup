@@ -2,9 +2,9 @@
 # How to download and run this script:
 # 
 # 1 - su -c "apt update"
-# 2 - su -c "apt install wget"
+# 2 - su -c "apt install curl"
 # 3 - cd ~
-# 4 - wget https://raw.githubusercontent.com/mortinger91/LinuxSetup/master/scripts/NEW_LINUX_SETUP.sh 
+# 4 - curl -O https://raw.githubusercontent.com/mortinger91/LinuxSetup/master/scripts/NEW_LINUX_SETUP.sh 
 # 5 - chmod +x NEW_LINUX_SETUP.sh
 # 6 - ./NEW_LINUX_SETUP.sh
 #####################################################
