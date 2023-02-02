@@ -274,8 +274,8 @@ if [ "$DISTRO" == "Debian" ]
 		${PKG_INSTALL} dnsutils 
 		${PKG_INSTALL} firmware-iwlwifi
 		${PKG_INSTALL} fonts-firacode 
-		${PKG_INSTALL} gcc 
 		${PKG_INSTALL} g++ 
+		${PKG_INSTALL} gcc 
 		${PKG_INSTALL} gdb 
 		${PKG_INSTALL} git 
 		${PKG_INSTALL} git-gui 
@@ -283,6 +283,7 @@ if [ "$DISTRO" == "Debian" ]
 		${PKG_INSTALL} gitk 
 		${PKG_INSTALL} gnome-keyring 
 		${PKG_INSTALL} gnupg 
+		${PKG_INSTALL} gparted 
 		${PKG_INSTALL} gzip 
 		${PKG_INSTALL} htop 
 		${PKG_INSTALL} locales-all
@@ -519,3 +520,7 @@ else
 fi 
 
 # Also add scripts from BootScripts repository for a machine specific configuration
+# 1 - cronjobs:
+# /home/michele/dev/BootScripts/onBoot.sh >/home/michele/dev/BootScripts/logs/log.txt 2>&1
+# 2 - KDE settings "Startup and Shutdown"/"Autostart":
+# /home/michele/dev/BootScripts/fixKDE/fixKDE.sh
