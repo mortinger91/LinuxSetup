@@ -287,7 +287,10 @@ if [ "$DISTRO" == "Debian" ]
 		${PKG_INSTALL} gzip 
 		${PKG_INSTALL} htop 
 		${PKG_INSTALL} locales-all
-		${PKG_INSTALL} libreoffice 
+		${PKG_INSTALL} libevdev-dev
+		${PKG_INSTALL} libudev-dev
+		${PKG_INSTALL} libconfig++-dev
+		${PKG_INSTALL} libreoffice
 		# OpenGL development
 		${PKG_INSTALL} libgl1-mesa-dev
 		${PKG_INSTALL} libxcursor-dev
@@ -519,8 +522,7 @@ else
 
 fi 
 
-# Also add scripts from BootScripts repository for a machine specific configuration
-# 1 - cronjobs:
-# /home/michele/dev/BootScripts/onBoot.sh >/home/michele/dev/BootScripts/logs/log.txt 2>&1
-# 2 - KDE settings "Startup and Shutdown"/"Autostart":
+# Add scripts from BootScripts repository for a machine specific configuration:
+# Go to KDE settings "Startup and Shutdown"/"Autostart" and add:
 # /home/michele/dev/BootScripts/fixKDE/fixKDE.sh
+# Configure "MX Ergo Multi-Device Trackball " device using https://github.com/PixlOne/logiops
