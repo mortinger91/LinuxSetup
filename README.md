@@ -1,5 +1,6 @@
 # LinuxSetup
-Setup of a new Linux system how I like it. In one giant (<i>but portable!</i>) file.
+Setup of a freshly installed Linux system, how I like it. In one giant (<i>but portable!</i>) file.<br>
+Supports Debian and (kind of) Manjaro.
 
 How to download and run this script:<br>
 1 - ```su -c "apt update"```<br>
