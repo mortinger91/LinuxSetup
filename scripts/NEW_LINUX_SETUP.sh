@@ -374,14 +374,14 @@ if [ "$DISTRO" == "Debian" ]
 		then
 			echo "Skipping Docker"
 		else
-			sudo mkdir -p /etc/apt/keyrings
+			sudo mkdir -m 0755 -p /etc/apt/keyrings
 			curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-			echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian bullseye stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 			# change to bullseye to $(lsb_release -cs) when docker is released for bookworm
+			echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian bullseye stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 			${PKG_UPDATE}
 			# If update throws an error try this command:
 			# sudo chmod a+r /etc/apt/keyrings/docker.gpg
-			${PKG_INSTALL} docker-ce docker-ce-cli containerd.io docker-compose-plugin
+			${PKG_INSTALL} docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 			sudo groupadd docker
 			sudo usermod -aG docker ${userName}
 			echo "Testing docker installation, reboot to test without sudo"
