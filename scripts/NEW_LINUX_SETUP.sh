@@ -264,6 +264,7 @@ if [ "$DISTRO" == "Debian" ]
 		# Debian packages
 		${PKG_INSTALL} apt-transport-https 
 		${PKG_INSTALL} apt-utils 
+		${PKG_INSTALL} bash-completion 
 		${PKG_INSTALL} bear 
 		${PKG_INSTALL} build-tools 
 		${PKG_INSTALL} ca-certificates 
@@ -287,6 +288,7 @@ if [ "$DISTRO" == "Debian" ]
 		${PKG_INSTALL} gzip 
 		${PKG_INSTALL} htop 
 		${PKG_INSTALL} locales-all
+		${PKG_INSTALL} locate
 		${PKG_INSTALL} libevdev-dev
 		${PKG_INSTALL} libudev-dev
 		${PKG_INSTALL} libconfig++-dev
@@ -316,6 +318,7 @@ if [ "$DISTRO" == "Debian" ]
 		${PKG_INSTALL} ssl-cert 
 		${PKG_INSTALL} telegram-desktop
 		${PKG_INSTALL} unzip 
+		${PKG_INSTALL} whereis 
 
 		echo "    Install Visual Studio Code (y/n)?"
 		read answer
