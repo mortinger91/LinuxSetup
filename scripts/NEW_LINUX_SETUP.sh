@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #####################################################
 # How to download and run this script:
 # 
@@ -13,7 +15,7 @@
 echo "New Linux installation setup:"
 echo "Run the script as your user, not root"
 echo "Do you want to configure the system (y/n)?"
-read answer
+read -r answer
 if [ "$answer" == "${answer#[Yy]}" ]
 then
 	exit
@@ -24,8 +26,8 @@ fi
 echo "  0 - initial setup:"
 
 # Detecting distribution (Debian or Manjaro)
-if [ sudo apt --version >/dev/null 2>&1 ]
-then
+apt --version >/dev/null 2>&1
+if [ $? -ne 0 ]; then
 	echo "Detected Manjaro"
 	PKG_INSTALL="sudo pacman -S --noconfirm"
 	DISTRO="Manjaro"
@@ -36,8 +38,7 @@ else
 fi
 
 # Checking if Xorg or Wayland is in use
-if [ "$XDG_SESSION_TYPE" == "x11" ]
-then
+if [ "$XDG_SESSION_TYPE" == "x11" ]; then
 	echo "Xorg in use as expected!"
 else
 	echo "Wayland in use, consider switching to Xorg!"
@@ -50,9 +51,8 @@ echo "Username is: ${userName}"
 # Section 1
 echo "  1 - Configuring sudo:"
 echo "    Configure sudo (y/n)?"
-read answer
-if [ "$answer" == "${answer#[Yy]}" ]
-then
+read -r answer
+if [ "$answer" == "${answer#[Yy]}" ]; then
 	echo -e "    Skipping sudo\n"
 else
 
@@ -75,21 +75,19 @@ fi
 # Section 2
 echo "  2 - Configuring touchpad gestures:"
 echo "    Configure touchpad gestures (y/n)?"
-read answer
-if [ "$answer" == "${answer#[Yy]}" ]
-then
+read -r answer
+if [ "$answer" == "${answer#[Yy]}" ]; then
 	echo -e "    Skipping touchpad gestures\n"
 else
-	if [ "$DISTRO" == "Debian" ]
-	then
+	if [ "$DISTRO" == "Debian" ]; then
 		${PKG_UPDATE}
 		${PKG_INSTALL} make
 
 		# Building libinput-gestures from github
 		mkdir ~/temp
-		cd ~/temp
+		cd ~/temp || exit
 		git clone https://github.com/bulletmark/libinput-gestures.git
-		cd libinput-gestures
+		cd libinput-gestures || exit
 		sudo make install 
 		# or "sudo ./libinput-gestures-setup install"
 	else
@@ -106,7 +104,7 @@ else
 	echo -e "# Swipe threshold (0-100) \n swipe_threshold 0 \n \n # Gestures \n gesture swipe left 3 xdotool key ctrl+shift+Tab \n gesture swipe right 3 xdotool key ctrl+Tab \n gesture swipe left 4 xdotool key ctrl+w \n gesture swipe right 4 xdotool key ctrl+t \n gesture swipe up 3 xdotool key ctrl+alt+Up \n gesture swipe down 3 xdotool key ctrl+alt+Down" \
 	> ~/.config/libinput-gestures.conf
 
-	sudo usermod -a -G input ${userName}
+	sudo usermod -a -G input "${userName}"
 
 	libinput-gestures-setup stop desktop autostart start
 
@@ -122,9 +120,8 @@ fi
 # Section 3
 echo "  3 - Configuring .bashrc and .bash_aliases:"
 echo "    Configure .bashrc and .bash_aliases (y/n)?"
-read answer
-if [ "$answer" == "${answer#[Yy]}" ]
-then
+read -r answer
+if [ "$answer" == "${answer#[Yy]}" ]; then
 	echo -e "    Skipping bash\n"
 else
 
@@ -157,7 +154,7 @@ else
 	myrc="${myrc}\n#shopt -s globstar"
 	myrc="${myrc}\n"
 	myrc="${myrc}\n# make less more friendly for non-text input files, see lesspipe(1)"
-	myrc="${myrc}\n#[ -x /usr/bin/lesspipe ] && eval \""'$(SHELL=/bin/sh lesspipe)'"\""
+	myrc="${myrc}\n#[ -x /usr/bin/lesspipe ] && eval \""\"$(SHELL=/bin/sh lesspipe)\""\""
 	myrc="${myrc}\n"
 	myrc="${myrc}\n# set variable identifying the chroot you work in (used in the prompt below)"
 	myrc="${myrc}\nif [ -z \"""\${debian_chroot:-}""\" ] && [ -r /etc/debian_chroot ]; then"
@@ -219,14 +216,13 @@ else
 	myrc="${myrc}\n"
 
 	touch ~/.bashrc
-	echo -e $myrc > ~/.bashrc
+	echo -e "${myrc}" > ~/.bashrc
 	sed -i 's/è//g' ~/.bashrc
 
 	# Writing ~/.bash_aliases file
 	mydefaliases="# My Bash default aliases:"
 	# Package update
-	if [ "$DISTRO" == "Debian" ]
-	then
+	if [ "$DISTRO" == "Debian" ]; then
 		mydefaliases="${mydefaliases}\n   alias up='sudo apt update && sudo apt full-upgrade -y'"
 	else
 		mydefaliases="${mydefaliases}\n   alias up='sudo pacman -Syyu'"
@@ -237,7 +233,7 @@ else
 	mydefaliases="${mydefaliases}\n"
 
 	touch ~/.bash_aliases
-	echo -e $mydefaliases > ~/.bash_aliases
+	echo -e "${mydefaliases}" > ~/.bash_aliases
 
 	# Writing ~/.bash_custom_aliases file
 	myaliases="# My Bash custom aliases:"
@@ -245,20 +241,18 @@ else
 	myaliases="${myaliases}\n"
 
 	touch ~/.bash_custom_aliases
-	echo -e $myaliases > ~/.bash_custom_aliases
+	echo -e "${myaliases}" > ~/.bash_custom_aliases
 fi
 
 
 # Section 4
 echo "  4 - Installing useful packages:"
 echo "    Install useful packages (y/n)?"
-read answer
-if [ "$answer" == "${answer#[Yy]}" ]
-then
+read -r answer
+if [ "$answer" == "${answer#[Yy]}" ]; then
 	echo -e "    Skipping useful packages\n"
 else
-if [ "$DISTRO" == "Debian" ]
-	then
+	if [ "$DISTRO" == "Debian" ]; then
 		${PKG_UPDATE}
 
 		# Debian packages
@@ -321,13 +315,12 @@ if [ "$DISTRO" == "Debian" ]
 		${PKG_INSTALL} whereis 
 
 		echo "    Install Visual Studio Code (y/n)?"
-		read answer
-		if [ "$answer" == "${answer#[Yy]}" ]
-		then
+		read -r answer
+		if [ "$answer" == "${answer#[Yy]}" ]; then
 			echo "Skipping VSCode"
 		else
 			mkdir ~/temp
-			cd ~/temp
+			cd ~/temp || exit
 
 			# Visual Studio Code installation
 			wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
@@ -339,13 +332,12 @@ if [ "$DISTRO" == "Debian" ]
 		fi
 
 		echo "    Install Google Chrome (y/n)?"
-		read answer
-		if [ "$answer" == "${answer#[Yy]}" ]
-		then
+		read -r answer
+		if [ "$answer" == "${answer#[Yy]}" ]; then
 			echo "Skipping Google Chrome"
 		else
 			mkdir ~/temp
-			cd ~/temp
+			cd ~/temp || exit
 
 			# Google Chrome installation
 			wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
@@ -353,28 +345,25 @@ if [ "$DISTRO" == "Debian" ]
 		fi
 
 		echo "    Install Wireshark (y/n)?"
-		read answer
-		if [ "$answer" == "${answer#[Yy]}" ]
-		then
+		read -r answer
+		if [ "$answer" == "${answer#[Yy]}" ]; then
 			echo "Skipping Wireshark"
 		else
 			${PKG_INSTALL} wireshark 
-			sudo usermod -a -G wireshark ${userName}
+			sudo usermod -a -G wireshark "${userName}"
 		fi
 
 		echo "    Install Rust Toolchain (y/n)?"
-		read answer
-		if [ "$answer" == "${answer#[Yy]}" ]
-		then
+		read -r answer
+		if [ "$answer" == "${answer#[Yy]}" ]; then
 			echo "Skipping Rust Toolchain"
 		else
 			curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 		fi
 
 		echo "    Install Docker (y/n)?"
-		read answer
-		if [ "$answer" == "${answer#[Yy]}" ]
-		then
+		read -r answer
+		if [ "$answer" == "${answer#[Yy]}" ]; then
 			echo "Skipping Docker"
 		else
 			sudo mkdir -m 0755 -p /etc/apt/keyrings
@@ -386,7 +375,7 @@ if [ "$DISTRO" == "Debian" ]
 			# sudo chmod a+r /etc/apt/keyrings/docker.gpg
 			${PKG_INSTALL} docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 			sudo groupadd docker
-			sudo usermod -aG docker ${userName}
+			sudo usermod -aG docker "${userName}"
 			echo "Testing docker installation, reboot to test without sudo"
 			sudo docker run hello-world
 		fi	
@@ -402,37 +391,34 @@ fi
 # Section 5
 echo "  5 - Perform git configuration:"
 echo "    Perform git configuration (y/n)?"
-read answer
-if [ "$answer" == "${answer#[Yy]}" ]
-then
+read -r answer
+if [ "$answer" == "${answer#[Yy]}" ]; then
 	echo -e "    Skipping git configuration\n"
 else
 	# Configuring git
 	echo "Insert git user.name:"
-	read name
-	git config --global user.name $name
+	read -r name
+	git config --global user.name "${name}"
 	echo "Insert git user.email:"
-	read email
-	git config --global user.email $email
+	read -r email
+	git config --global user.email "${email}"
 	git config --global credential.helper store
 	git config --global pull.ff only
 	git config --global pull.rebase false
 	echo "Insert git default branch name:"
-	read default
-	git config --global init.defaultBranch $default
+	read -r default
+	git config --global init.defaultBranch "${default}"
 	echo "Do you want to setup git signing (y/n)?"
-	read answer
-	if [ "$answer" == "${answer#[Nn]}" ]
-	then
+	read -r answer
+	if [ "$answer" == "${answer#[Nn]}" ]; then
 		echo "Insert gpg key ID:"
-		read keyid
-		git config --global user.signingKey $keyid
+		read -r keyid
+		git config --global user.signingKey "${keyid}"
 		git config --global commit.gpgSign true
 	fi
 	echo "Do you want to review your git configuration (y/n)?"
-	read answer
-	if [ "$answer" == "${answer#[Nn]}" ]
-	then
+	read -r answer
+	if [ "$answer" == "${answer#[Nn]}" ]; then
 		git config --list
 	fi
 
@@ -444,9 +430,8 @@ fi
 # Section 6
 echo "  6 - Perform KDE configuration:"
 echo "    Perform KDE configuration (y/n)?"
-read answer
-if [ "$answer" == "${answer#[Yy]}" ]
-then
+read -r answer
+if [ "$answer" == "${answer#[Yy]}" ]; then
 	echo -e "    Skipping KDE configuration\n"
 else
 	echo "    Copying KDE configuration..."
@@ -503,9 +488,8 @@ fi
 # Section 7
 echo "  7 - Perform grub configuration:"
 echo "    Perform grub configuration (y/n)?"
-read answer
-if [ "$answer" == "${answer#[Yy]}" ]
-then
+read -r answer
+if [ "$answer" == "${answer#[Yy]}" ]; then
 	echo -e "    Skipping grub configuration\n"
 else
 	echo -e "#User defined resolution for grub\nGRUB_GFXMODE=640x480\n" | sudo tee -a /etc/default/grub
@@ -515,9 +499,8 @@ fi
 
 echo "New Linux installation setup completed, rebooting is recommended"
 echo "Reboot the system (y/n)?"
-read answer
-if [ "$answer" == "${answer#[Yy]}" ]
-then
+read -r answer
+if [ "$answer" == "${answer#[Yy]}" ]; then
 	echo "Skipping reboot"
 else
 
