@@ -307,6 +307,7 @@ else
 		${PKG_INSTALL} make 
 		${PKG_INSTALL} openssl 
 		${PKG_INSTALL} python3 
+		${PKG_INSTALL} python3-venv 
 		${PKG_INSTALL} tcpdump 
 		${PKG_INSTALL} tlp 
 		${PKG_INSTALL} ssh 
