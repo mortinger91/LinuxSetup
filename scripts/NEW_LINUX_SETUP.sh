@@ -304,6 +304,7 @@ else
 		${PKG_INSTALL} nmap 
 		${PKG_INSTALL} net-tools 
 		${PKG_INSTALL} network-manager-openvpn 
+		${PKG_INSTALL} nginx 
 		${PKG_INSTALL} make 
 		${PKG_INSTALL} openssl 
 		${PKG_INSTALL} python3 
