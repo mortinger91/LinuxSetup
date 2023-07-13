@@ -480,6 +480,7 @@ else
 	#
 	# System Load Viewer
 	# Thermal Monitor
+	# Configurable button
 	#
 	# Non-KDE specific 
 	# ~/.local/share/fonts/*
