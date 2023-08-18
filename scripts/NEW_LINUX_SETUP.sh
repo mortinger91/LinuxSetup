@@ -260,6 +260,7 @@ else
 		# Debian packages
 		${PKG_INSTALL} apt-transport-https 
 		${PKG_INSTALL} apt-utils 
+		${PKG_INSTALL} autoconf 
 		${PKG_INSTALL} bash-completion 
 		${PKG_INSTALL} bear 
 		${PKG_INSTALL} build-tools 
