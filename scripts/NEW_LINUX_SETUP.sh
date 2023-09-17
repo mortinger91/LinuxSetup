@@ -136,7 +136,8 @@ else
 	myrc="${myrc}\n"
 	myrc="${myrc}\n# do not put duplicate lines or lines starting with space in the history."
 	myrc="${myrc}\n# See bash(1) for more options"
-	myrc="${myrc}\nHISTCONTROL=ignoreboth"
+	myrc="${myrc}\n# Not adding hist and history calls to the history"
+	myrc="${myrc}\nexport HISTIGNORE=\"hist*:ignoreboth\""
 	myrc="${myrc}\n"
 	myrc="${myrc}\n# append to the history file, don't overwrite it"
 	myrc="${myrc}\nshopt -s histappend"
@@ -234,6 +235,10 @@ else
 	# Other default aliases
 	mydefaliases="${mydefaliases}\n   alias ls='ls -lah --color'"
 	mydefaliases="${mydefaliases}\n   alias myip='echo -e \"Current IP address: \$(dig +short myip.opendns.com @resolver1.opendns.com)\"'"
+
+	mydefaliases="${mydefaliases}\n   hist() {"
+	mydefaliases="${mydefaliases}\n   	history | grep -i \"$1\" | tail -n 10"
+	mydefaliases="${mydefaliases}\n   }"
 	mydefaliases="${mydefaliases}\n"
 
 	touch ~/.bash_aliases
