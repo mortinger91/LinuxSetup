@@ -271,6 +271,8 @@ else
 		${PKG_INSTALL} autoconf 
 		${PKG_INSTALL} bash-completion 
 		${PKG_INSTALL} bear 
+		${PKG_INSTALL} bpfcc-tools 
+		${PKG_INSTALL} bpftrace 
 		${PKG_INSTALL} build-tools 
 		${PKG_INSTALL} ca-certificates 
 		${PKG_INSTALL} clang 
@@ -436,7 +438,7 @@ else
 	fi
 
 	# Configuring git lfs
-	git lfs install
+	git lfs install --system
 fi 
 
 
