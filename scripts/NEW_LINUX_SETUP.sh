@@ -235,7 +235,8 @@ else
 	# Other default aliases
 	mydefaliases="${mydefaliases}\n   alias ls='ls -lah --color'"
 	mydefaliases="${mydefaliases}\n   alias myip='echo -e \"Current IP address: \$(dig +short myip.opendns.com @resolver1.opendns.com)\"'"
-
+	mydefaliases="${mydefaliases}\n   # Use hist to print last 10 elements in history"
+	mydefaliases="${mydefaliases}\n   # Use hist text to print last 10 elements in history that contains text"
 	mydefaliases="${mydefaliases}\n   hist() {"
 	mydefaliases="${mydefaliases}\n   	history | grep -i \"$1\" | tail -n 10"
 	mydefaliases="${mydefaliases}\n   }"
