@@ -158,6 +158,10 @@ else
 	myrc="${myrc}\n# match all files and zero or more directories and subdirectories."
 	myrc="${myrc}\n#shopt -s globstar"
 	myrc="${myrc}\n"
+	myrc="${myrc}\n# ccache makes compilation faster by caching built files"
+	myrc="${myrc}\n# this works even if you change branch or delete your build files"
+	myrc="${myrc}\nexport COMPILER_LAUNCHER=ccache"
+	myrc="${myrc}\n"
 	myrc="${myrc}\n# make less more friendly for non-text input files, see lesspipe(1)"
 	myrc="${myrc}\n#[ -x /usr/bin/lesspipe ] && eval \""\"$(SHELL=/bin/sh lesspipe)\""\""
 	myrc="${myrc}\n"
@@ -275,6 +279,7 @@ else
 		${PKG_INSTALL} bpftrace 
 		${PKG_INSTALL} build-tools 
 		${PKG_INSTALL} ca-certificates 
+		${PKG_INSTALL} ccache 
 		${PKG_INSTALL} clang 
 		${PKG_INSTALL} cmake 
 		${PKG_INSTALL} curl 
