@@ -239,12 +239,21 @@ else
 	# Other default aliases
 	mydefaliases="${mydefaliases}\n   alias ls='ls -lah --color'"
 	mydefaliases="${mydefaliases}\n   alias myip='echo -e \"Current IP address: \$(dig +short myip.opendns.com @resolver1.opendns.com)\"'"
-	mydefaliases="${mydefaliases}\n   # Use hist to print last 10 elements in history"
-	mydefaliases="${mydefaliases}\n   # Use hist text to print last 10 elements in history that contains text"
+	mydefaliases="${mydefaliases}\n   # Use hist -nX to print last X elements in the history."
+	mydefaliases="${mydefaliases}\n   # Use hist -nX git clone to print last X elements in the history"
+	mydefaliases="${mydefaliases}\n   # that contains 'git clone'"
 	mydefaliases="${mydefaliases}\n   hist() {"
-	mydefaliases="${mydefaliases}\n   	history | grep -i \"$1\" | tail -n 10"
-	mydefaliases="${mydefaliases}\n   }"
-	mydefaliases="${mydefaliases}\n"
+	mydefaliases="${mydefaliases}\n     SEARCH_STR=\"\""
+	mydefaliases="${mydefaliases}\n     LINES_COUNT=10"
+	mydefaliases="${mydefaliases}\n     for param in \"$@\"; do"
+	mydefaliases="${mydefaliases}\n       if [[ \"$param\" =~ -n[0-9]+ ]]; then"
+    mydefaliases="${mydefaliases}\n         LINES_COUNT=${param:2}"
+    mydefaliases="${mydefaliases}\n       else"
+    mydefaliases="${mydefaliases}\n        SEARCH_STR=\"${SEARCH_STR} ${param}\""
+    mydefaliases="${mydefaliases}\n       fi"
+    mydefaliases="${mydefaliases}\n     done"
+    mydefaliases="${mydefaliases}\n     history | grep -i \"$SEARCH_STR\" | tail -n \"$LINES_COUNT\""
+    mydefaliases="${mydefaliases}\n   }"
 
 	touch ~/.bash_aliases
 	echo -e "${mydefaliases}" > ~/.bash_aliases
