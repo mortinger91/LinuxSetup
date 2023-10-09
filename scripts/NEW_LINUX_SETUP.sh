@@ -138,6 +138,7 @@ else
 	myrc="${myrc}\n# See bash(1) for more options"
 	myrc="${myrc}\n# Not adding clear, hist and history calls to the history"
 	myrc="${myrc}\nexport HISTIGNORE=\"clear:hist*:ignoreboth\""
+	myrc="${myrc}\nexport HISTCONTROL=ignoreboth"
 	myrc="${myrc}\n"
 	myrc="${myrc}\n# append to the history file, don't overwrite it"
 	myrc="${myrc}\nshopt -s histappend"
