@@ -291,6 +291,7 @@ else
 		${PKG_INSTALL} ca-certificates 
 		${PKG_INSTALL} ccache 
 		${PKG_INSTALL} clang 
+		${PKG_INSTALL} clang-format 
 		${PKG_INSTALL} cmake 
 		${PKG_INSTALL} curl 
 		${PKG_INSTALL} docker 
