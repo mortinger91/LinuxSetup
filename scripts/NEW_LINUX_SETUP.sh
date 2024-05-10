@@ -2,11 +2,11 @@
 
 #####################################################
 # How to download and run this script:
-# 
+#
 # 1 - su -c "apt update"
 # 2 - su -c "apt install curl"
 # 3 - cd ~
-# 4 - curl -O https://raw.githubusercontent.com/mortinger91/LinuxSetup/master/scripts/NEW_LINUX_SETUP.sh 
+# 4 - curl -O https://raw.githubusercontent.com/mortinger91/LinuxSetup/master/scripts/NEW_LINUX_SETUP.sh
 # 5 - chmod +x NEW_LINUX_SETUP.sh
 # 6 - ./NEW_LINUX_SETUP.sh
 #####################################################
@@ -88,15 +88,15 @@ else
 		cd ~/temp || exit
 		git clone https://github.com/bulletmark/libinput-gestures.git
 		cd libinput-gestures || exit
-		sudo make install 
+		sudo make install
 		# or "sudo ./libinput-gestures-setup install"
 	else
 		# This package may be available only on AUR
 		${PKG_INSTALL} libinput-gestures
 	fi
 
-	${PKG_INSTALL} wmctrl 
-	${PKG_INSTALL} libinput-tools 
+	${PKG_INSTALL} wmctrl
+	${PKG_INSTALL} libinput-tools
 	${PKG_INSTALL} xdotool
 
 	mkdir ~/.config >/dev/null 2>&1
@@ -280,36 +280,35 @@ else
 		${PKG_UPDATE}
 
 		# Debian packages
-		${PKG_INSTALL} apt-transport-https 
-		${PKG_INSTALL} apt-utils 
-		${PKG_INSTALL} autoconf 
-		${PKG_INSTALL} bash-completion 
-		${PKG_INSTALL} bear 
-		${PKG_INSTALL} bpfcc-tools 
-		${PKG_INSTALL} bpftrace 
-		${PKG_INSTALL} build-tools 
-		${PKG_INSTALL} ca-certificates 
-		${PKG_INSTALL} ccache 
-		${PKG_INSTALL} clang 
-		${PKG_INSTALL} clang-format 
-		${PKG_INSTALL} cmake 
-		${PKG_INSTALL} curl 
-		${PKG_INSTALL} docker 
-		${PKG_INSTALL} dnsutils 
+		${PKG_INSTALL} apt-transport-https
+		${PKG_INSTALL} apt-utils
+		${PKG_INSTALL} autoconf
+		${PKG_INSTALL} bash-completion
+		${PKG_INSTALL} bear
+		${PKG_INSTALL} bpfcc-tools
+		${PKG_INSTALL} bpftrace
+		${PKG_INSTALL} build-tools
+		${PKG_INSTALL} ca-certificates
+		${PKG_INSTALL} ccache
+		${PKG_INSTALL} clang
+		${PKG_INSTALL} clang-format
+		${PKG_INSTALL} cmake
+		${PKG_INSTALL} curl
+		${PKG_INSTALL} dnsutils
 		${PKG_INSTALL} firmware-iwlwifi
-		${PKG_INSTALL} fonts-firacode 
-		${PKG_INSTALL} g++ 
-		${PKG_INSTALL} gcc 
-		${PKG_INSTALL} gdb 
-		${PKG_INSTALL} git 
-		${PKG_INSTALL} git-gui 
-		${PKG_INSTALL} git-lfs 
-		${PKG_INSTALL} gitk 
-		${PKG_INSTALL} gnome-keyring 
-		${PKG_INSTALL} gnupg 
-		${PKG_INSTALL} gparted 
-		${PKG_INSTALL} gzip 
-		${PKG_INSTALL} htop 
+		${PKG_INSTALL} fonts-firacode
+		${PKG_INSTALL} g++
+		${PKG_INSTALL} gcc
+		${PKG_INSTALL} gdb
+		${PKG_INSTALL} git
+		${PKG_INSTALL} git-gui
+		${PKG_INSTALL} git-lfs
+		${PKG_INSTALL} gitk
+		${PKG_INSTALL} gnome-keyring
+		${PKG_INSTALL} gnupg
+		${PKG_INSTALL} gparted
+		${PKG_INSTALL} gzip
+		${PKG_INSTALL} htop
 		${PKG_INSTALL} locales-all
 		${PKG_INSTALL} locate
 		${PKG_INSTALL} libevdev-dev
@@ -324,26 +323,26 @@ else
 		${PKG_INSTALL} libxrandr-dev
 		${PKG_INSTALL} libxss-dev
 		# End of OpenGL development
-		${PKG_INSTALL} lsb-release 
-		${PKG_INSTALL} lldb 
-		${PKG_INSTALL} llvm 
+		${PKG_INSTALL} lsb-release
+		${PKG_INSTALL} lldb
+		${PKG_INSTALL} llvm
 		${PKG_INSTALL} lm-sensors
-		${PKG_INSTALL} nmap 
-		${PKG_INSTALL} net-tools 
-		${PKG_INSTALL} network-manager-openvpn 
-		${PKG_INSTALL} nginx 
-		${PKG_INSTALL} make 
-		${PKG_INSTALL} openssl 
-		${PKG_INSTALL} python3 
-		${PKG_INSTALL} python3-venv 
-		${PKG_INSTALL} tcpdump 
-		${PKG_INSTALL} tlp 
-		${PKG_INSTALL} ssh 
-		${PKG_INSTALL} sshfs 
-		${PKG_INSTALL} ssl-cert 
+		${PKG_INSTALL} nmap
+		${PKG_INSTALL} net-tools
+		${PKG_INSTALL} network-manager-openvpn
+		${PKG_INSTALL} nginx
+		${PKG_INSTALL} make
+		${PKG_INSTALL} openssl
+		${PKG_INSTALL} python3
+		${PKG_INSTALL} python3-venv
+		${PKG_INSTALL} tcpdump
+		${PKG_INSTALL} tlp
+		${PKG_INSTALL} ssh
+		${PKG_INSTALL} sshfs
+		${PKG_INSTALL} ssl-cert
 		${PKG_INSTALL} telegram-desktop
-		${PKG_INSTALL} unzip 
-		${PKG_INSTALL} whereis 
+		${PKG_INSTALL} unzip
+		${PKG_INSTALL} whereis
 
 		echo "    Install Visual Studio Code (y/n)?"
 		read -r answer
@@ -380,7 +379,7 @@ else
 		if [ "$answer" == "${answer#[Yy]}" ]; then
 			echo "Skipping Wireshark"
 		else
-			${PKG_INSTALL} wireshark 
+			${PKG_INSTALL} wireshark
 			sudo usermod -a -G wireshark "${userName}"
 		fi
 
@@ -399,20 +398,19 @@ else
 		else
 			sudo mkdir -m 0755 -p /etc/apt/keyrings
 			curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-			# change to bullseye to $(lsb_release -cs) when docker is released for bookworm
-			echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian bullseye stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+			echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 			${PKG_UPDATE}
 			# If update throws an error try this command:
 			# sudo chmod a+r /etc/apt/keyrings/docker.gpg
-			${PKG_INSTALL} docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+			${PKG_INSTALL} docker docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 			sudo groupadd docker
 			sudo usermod -aG docker "${userName}"
 			echo "Testing docker installation, reboot to test without sudo"
 			sudo docker run hello-world
-		fi	
+		fi
 	else
 		# Manjaro packages
-		${PKG_INSTALL} git 
+		${PKG_INSTALL} git
 		${PKG_INSTALL} dnsutils
 	fi
 
@@ -455,7 +453,7 @@ else
 
 	# Configuring git lfs
 	git lfs install --system
-fi 
+fi
 
 
 # Section 6
@@ -476,7 +474,7 @@ else
 	# ~/.local/share/kxmlgui5/dolphin/*
 	# ~/.local/share/networkmanagement/*
 	#
-	# This contains the user installed widgets, it is advised to 
+	# This contains the user installed widgets, it is advised to
 	# download them again in the new system and do not copy this folder
 	# ~/.local/share/plasma/plasmoids/*
 	#
@@ -509,7 +507,7 @@ else
 	# Thermal Monitor
 	# Configurable button
 	#
-	# Non-KDE specific 
+	# Non-KDE specific
 	# ~/.local/share/fonts/*
 	# ~/.selected_editor
 	# ~/.local/share/TelegramDesktop/*
@@ -525,7 +523,7 @@ if [ "$answer" == "${answer#[Yy]}" ]; then
 	echo -e "    Skipping grub configuration\n"
 else
 	echo -e "#User defined resolution for grub\nGRUB_GFXMODE=640x480\n" | sudo tee -a /etc/default/grub
-	sudo update-grub 
+	sudo update-grub
 fi
 
 
@@ -538,7 +536,7 @@ else
 
 	sudo reboot now
 
-fi 
+fi
 
 # Add scripts from BootScripts repository for a machine specific configuration:
 # Go to KDE settings "Startup and Shutdown"/"Autostart" and add:
