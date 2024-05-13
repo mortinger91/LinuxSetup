@@ -125,8 +125,16 @@ if [ "$answer" == "${answer#[Yy]}" ]; then
 	echo -e "    Skipping bash\n"
 else
 
+    # Used for fzf and other user installed binaries
+    mkdir /home/${userName}/bin
+
 	# ~/.bashrc file
 	myrc="# ~/.bashrc: executed by bash(1) for non-login shells."
+	myrc="${myrc}\n"
+    myrc="${myrc}\n export PATH=/home/m/.cargo/bin:/home/${userName}/bin:\$PATH"
+	myrc="${myrc}\n"
+    myrc="${myrc}\n # Set up fzf key bindings and fuzzy completion"
+    myrc="${myrc}\n eval \"\$(fzf --bash)\""
 	myrc="${myrc}\n"
 	myrc="${myrc}\n# If not running interactively, don't do anything"
 	myrc="${myrc}\ncase \$- in"
@@ -221,8 +229,6 @@ else
 	myrc="${myrc}\n"
 	myrc="${myrc}\n# Add directories to the PATH"
 	myrc="${myrc}\n# Example: export PATH=/usr/lib/jvm/java-11-openjdk-amd64/bin:\$PATH"
-	myrc="${myrc}\n"
-	myrc="${myrc}\n export PATH=/home/m/.cargo/bin:\$PATH"
 	myrc="${myrc}\n"
 
 	touch ~/.bashrc
