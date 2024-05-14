@@ -246,7 +246,7 @@ else
 	# Other default aliases
 	mydefaliases="${mydefaliases}\n   alias ls='ls -lah --color'"
 	mydefaliases="${mydefaliases}\n   alias myip='curl ipecho.net/plain; echo'"
-    mydefaliases="${mydefaliases}\n   alias lsf='fzf --preview \"echo {}; echo; cat {}\" --preview-window wrap'"
+    mydefaliases="${mydefaliases}\n   alias lsf='fzf --preview \"echo -e \"\033[31m~~~\033[0m\"; echo {}; echo -e \"\033[31m~~~\033[0m\"; cat {}\" --preview-window wrap'"
 	mydefaliases="${mydefaliases}\n   # Use hist -nX to print last X elements in the history."
 	mydefaliases="${mydefaliases}\n   # Use hist -nX git clone to print last X elements in the history"
 	mydefaliases="${mydefaliases}\n   # that contains 'git clone'"
