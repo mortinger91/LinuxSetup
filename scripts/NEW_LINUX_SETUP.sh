@@ -124,9 +124,11 @@ read -r answer
 if [ "$answer" == "${answer#[Yy]}" ]; then
 	echo -e "    Skipping bash\n"
 else
-
     # Used for fzf and other user installed binaries
     mkdir /home/${userName}/bin
+
+    ${PKG_INSTALL} zsh
+    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 	# ~/.bashrc file
 	myrc="# ~/.bashrc: executed by bash(1) for non-login shells."
@@ -205,11 +207,6 @@ else
 	myrc="${myrc}\n# colored GCC warnings and errors"
 	myrc="${myrc}\nexport GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'"
 	myrc="${myrc}\n"
-	myrc="${myrc}\n# Aliases definitions."
-	myrc="${myrc}\nif [ -f ~/.bash_aliases ]; then"
-	myrc="${myrc}\n    . ~/.bash_aliases"
-	myrc="${myrc}\nfi"
-	myrc="${myrc}\n"
 	myrc="${myrc}\n# Custom aliases definitions."
 	myrc="${myrc}\nif [ -f ~/.bash_custom_aliases ]; then"
 	myrc="${myrc}\n    . ~/.bash_custom_aliases"
@@ -236,7 +233,7 @@ else
 	sed -i 's/è//g' ~/.bashrc
 
 	# Writing ~/.bash_aliases file
-	mydefaliases="# My Bash default aliases:"
+	mydefaliases="# My Bash aliases:"
 	# Package update
 	if [ "$DISTRO" == "Debian" ]; then
 		mydefaliases="${mydefaliases}\n   alias up='sudo apt update && sudo apt full-upgrade -y'"
@@ -263,16 +260,8 @@ else
     mydefaliases="${mydefaliases}\n     history | grep -i \"$SEARCH_STR\" | tail -n \"$LINES_COUNT\""
     mydefaliases="${mydefaliases}\n   }"
 
-	touch ~/.bash_aliases
-	echo -e "${mydefaliases}" > ~/.bash_aliases
-
-	# Writing ~/.bash_custom_aliases file
-	myaliases="# My Bash custom aliases:"
-	myaliases="${myaliases}\n   # alias myalias='mycmd'"
-	myaliases="${myaliases}\n"
-
 	touch ~/.bash_custom_aliases
-	echo -e "${myaliases}" > ~/.bash_custom_aliases
+	echo -e "${mydefaliases}" > ~/.bash_custom_aliases
 fi
 
 
