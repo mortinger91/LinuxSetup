@@ -161,7 +161,7 @@ else
 	cp .zsh_custom_aliases $targetDir/.zsh_custom_aliases
 
     echo "Adding .zshrc_custom link to ~/.zshrc file"
-    echo -e "\n# Custom zshrc file:\nif [ -f ~/.zshrc_custom ]; then\n  . ~/.zshrc_custom\nfi" >> $targetDir/.zshrc
+    echo -e "\n# Custom .zshrc file:\nif [ -f ~/.zshrc_custom ]; then\n  . ~/.zshrc_custom\nfi" >> $targetDir/.zshrc
     set +x
 fi
 
