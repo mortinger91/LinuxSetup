@@ -1,0 +1,7 @@
+# My Zsh default aliases:
+  alias ls='ls -lah --color'
+  alias up='sudo apt update && sudo apt full-upgrade -y'
+
+# My Zsh custom aliases:
+  alias myip='curl ipecho.net/plain; echo'
+  alias lsf='fzf --preview "echo -e \"\033[31m~~~\033[0m\"; echo {}; echo -e \"\033[31m~~~\033[0m\"; cat {}" --preview-window wrap | xclip -selection clipboard'

@@ -56,12 +56,13 @@ fi
 ARCH=$(dpkg --print-architecture)
 echo "Detected architecture: ${ARCH}"
 
+
 # Section 1
 echo "  1 - Configuring sudo:"
-echo "    Configure sudo (y/n)?"
+echo "    Do you want to configure sudo (y/n)?"
 read -r answer
 if [ "$answer" == "${answer#[Yy]}" ]; then
-	echo -e "    Skipping sudo\n"
+	echo -e "    Skipping sudo configuration\n"
 else
 
 	su -c "/sbin/usermod -a -G sudo ${userName}"
@@ -82,10 +83,10 @@ fi
 
 # Section 2
 echo "  2 - Configuring touchpad gestures:"
-echo "    Configure touchpad gestures (y/n)?"
+echo "    Do you want to configure touchpad gestures (y/n)?"
 read -r answer
 if [ "$answer" == "${answer#[Yy]}" ]; then
-	echo -e "    Skipping touchpad gestures\n"
+	echo -e "    Skipping touchpad gestures configuration\n"
 else
 	if [ "$DISTRO" == "Debian" ]; then
 		${PKG_UPDATE}
@@ -109,7 +110,7 @@ else
 
 	mkdir ~/.config >/dev/null 2>&1
 
-	echo -e "# Swipe threshold (0-100) \n swipe_threshold 0 \n \n # Gestures \n gesture swipe left 3 xdotool key ctrl+shift+Tab \n gesture swipe right 3 xdotool key ctrl+Tab \n gesture swipe left 4 xdotool key ctrl+w \n gesture swipe right 4 xdotool key ctrl+t \n gesture swipe up 3 xdotool key ctrl+alt+Up \n gesture swipe down 3 xdotool key ctrl+alt+Down" \
+	echo -e "# Swipe threshold (0-100)\nswipe_threshold 0\n\n# Gestures\n gesture swipe left 3 xdotool key ctrl+shift+Tab\ngesture swipe right 3 xdotool key ctrl+Tab\ngesture swipe left 4 xdotool key ctrl+w\ngesture swipe right 4 xdotool key ctrl+t\ngesture swipe up 3 xdotool key ctrl+alt+Up\ngesture swipe down 3 xdotool key ctrl+alt+Down" \
 	> ~/.config/libinput-gestures.conf
 
 	sudo usermod -a -G input "${userName}"
@@ -126,36 +127,51 @@ fi
 
 
 # Section 3
-echo "  3 - Configuring .zshrc and .bash_aliases:"
-echo "    Configure .zshrc and .bash_aliases (y/n)?"
+echo "  3a - Installing oh my zsh:"
+echo "    Do you want to install oh my zsh (y/n)?"
 read -r answer
 if [ "$answer" == "${answer#[Yy]}" ]; then
-	echo -e "    Skipping zsh configuration\n"
+	echo -e "    Skipping oh my zsh installation\n"
 else
-    # Used for fzf and other user installed binaries
-    mkdir /home/${userName}/bin
-
-    echo "Download fzf from the Github official page: https://github.com/junegunn/fzf/releases. Be careful to choose the right architecture. Then copy the fzf binary to /home/${userName}/bin"
-
     ${PKG_INSTALL} zsh
     sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
 
-	# ~/.custom_zshrc file
-	echo "Appending .custom_zshrc content to .zshrc"
-    cat .custom_zshrc >> /home/${userName}/.zshrc
+echo "  3b - Configuring .zshrc and aliases:"
+echo "    Do you want to configure .zshrc and aliases (y/n)?"
+read -r answer
+if [ "$answer" == "${answer#[Yy]}" ]; then
+	echo -e "    Skipping .zshrc and aliases configuration\n"
+else
+    echo "    Do you want to perform a dry-run (y/n)?"
+    read -r answer
+    if [ "$answer" == "${answer#[Yy]}" ]; then
+        targetDir="/home/${userName}"
+    else
+        echo -e "    Performing .zshrc dry run\n"
+        mkdir test >/dev/null 2>&1
+        targetDir="test"
+        rm "$targetDir/.zshrc" >/dev/null 2>&1
+        touch "$targetDir/.zshrc"
+    fi
 
-	# Writing ~/.bash_aliases file
-	echo "Copying .bash_custom_aliases file"
-	cp .bash_custom_aliases /home/${userName}/.bash_custom_aliases
+    set -x
+	echo "Copying .zshrc_custom and .zsh_custom_aliases files"
+	cp .zshrc_custom $targetDir/.zshrc_custom
+	cp .zsh_custom_aliases $targetDir/.zsh_custom_aliases
+
+    echo "Adding .zshrc_custom link to ~/.zshrc file"
+    echo -e "\n# Custom zshrc file:\nif [ -f ~/.zshrc_custom ]; then\n  . ~/.zshrc_custom\nfi" >> $targetDir/.zshrc
+    set +x
 fi
 
 
 # Section 4
 echo "  4 - Installing useful packages:"
-echo "    Install useful packages (y/n)?"
+echo "    Do you want to install useful packages (y/n)?"
 read -r answer
 if [ "$answer" == "${answer#[Yy]}" ]; then
-	echo -e "    Skipping useful packages\n"
+	echo -e "    Skipping useful packages installation\n"
 else
 	if [ "$DISTRO" == "Debian" ]; then
 		${PKG_UPDATE}
@@ -228,7 +244,7 @@ else
 		${PKG_INSTALL} whereis
 		${PKG_INSTALL} xclip
 
-		echo "    Install Visual Studio Code (y/n)?"
+		echo "    Do you want to install Visual Studio Code (y/n)?"
 		read -r answer
 		if [ "$answer" == "${answer#[Yy]}" ]; then
 			echo "Skipping VSCode"
@@ -245,7 +261,7 @@ else
 			${PKG_INSTALL} code
 		fi
 
-		echo "    Install Google Chrome (y/n)?"
+		echo "    Do you want to install Google Chrome (y/n)?"
 		read -r answer
 		if [ "$answer" == "${answer#[Yy]}" ]; then
 			echo "Skipping Google Chrome"
@@ -258,7 +274,7 @@ else
 			sudo dpkg -i google-chrome-stable_current_${ARCH}.deb
 		fi
 
-		echo "    Install Wireshark (y/n)?"
+		echo "    Do you want to install Wireshark (y/n)?"
 		read -r answer
 		if [ "$answer" == "${answer#[Yy]}" ]; then
 			echo "Skipping Wireshark"
@@ -267,7 +283,7 @@ else
 			sudo usermod -a -G wireshark "${userName}"
 		fi
 
-		echo "    Install Rust Toolchain (y/n)?"
+		echo "    Do you want to install Rust Toolchain (y/n)?"
 		read -r answer
 		if [ "$answer" == "${answer#[Yy]}" ]; then
 			echo "Skipping Rust Toolchain"
@@ -275,7 +291,7 @@ else
 			curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 		fi
 
-		echo "    Install Docker (y/n)?"
+		echo "    Do you want to install Docker (y/n)?"
 		read -r answer
 		if [ "$answer" == "${answer#[Yy]}" ]; then
 			echo "Skipping Docker"
@@ -292,6 +308,17 @@ else
 			echo "Testing docker installation, reboot to test without sudo"
 			sudo docker run hello-world
 		fi
+
+        echo "    Do you want to install fzf (y/n)?"
+		read -r answer
+		if [ "$answer" == "${answer#[Yy]}" ]; then
+			echo "Skipping fzf"
+		else
+            # Used for fzf and other user installed binaries
+            mkdir /home/${userName}/bin
+
+            echo -e "Download fzf from the Github official page:\nhttps://github.com/junegunn/fzf/releases\nBe careful to choose the right architecture.\nThen copy the fzf binary to /home/${userName}/bin"
+        fi
 	else
 		# Manjaro packages
 		${PKG_INSTALL} git
@@ -303,7 +330,7 @@ fi
 
 # Section 5
 echo "  5 - Perform git configuration:"
-echo "    Perform git configuration (y/n)?"
+echo "    Do you want to perform git configuration (y/n)?"
 read -r answer
 if [ "$answer" == "${answer#[Yy]}" ]; then
 	echo -e "    Skipping git configuration\n"
@@ -343,8 +370,20 @@ fi
 
 
 # Section 6
-echo "  6 - Perform KDE configuration:"
-echo "    Perform KDE configuration (y/n)?"
+echo "  6 - Perform grub configuration:"
+echo "    Do you want to perform grub configuration (y/n)?"
+read -r answer
+if [ "$answer" == "${answer#[Yy]}" ]; then
+	echo -e "    Skipping grub configuration\n"
+else
+	echo -e "#User defined resolution for grub\nGRUB_GFXMODE=640x480\n" | sudo tee -a /etc/default/grub
+	sudo update-grub
+fi
+
+
+# Section 7
+echo "  7 - Perform KDE configuration:"
+echo "    Do you want to perform KDE configuration (y/n)?"
 read -r answer
 if [ "$answer" == "${answer#[Yy]}" ]; then
 	echo -e "    Skipping KDE configuration\n"
@@ -398,18 +437,6 @@ else
 	# ~/.selected_editor
 	# ~/.local/share/TelegramDesktop/*
 	# ~/Templates/*
-fi
-
-
-# Section 7
-echo "  7 - Perform grub configuration:"
-echo "    Perform grub configuration (y/n)?"
-read -r answer
-if [ "$answer" == "${answer#[Yy]}" ]; then
-	echo -e "    Skipping grub configuration\n"
-else
-	echo -e "#User defined resolution for grub\nGRUB_GFXMODE=640x480\n" | sudo tee -a /etc/default/grub
-	sudo update-grub
 fi
 
 
