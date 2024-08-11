@@ -21,3 +21,5 @@ export COMPILER_LAUNCHER=ccache
 if [ -f ~/.zsh_custom_aliases ]; then
  . ~/.zsh_custom_aliases
 fi
+
+# Additional options:
