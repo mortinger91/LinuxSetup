@@ -317,7 +317,7 @@ else
             # Used for fzf and other user installed binaries
             mkdir /home/${userName}/bin
 
-            echo -e "Download fzf from the Github official page:\nhttps://github.com/junegunn/fzf/releases\nBe careful to choose the right architecture.\nThen copy the fzf binary to /home/${userName}/bin"
+            echo -e "Download fzf from the Github official page:\nhttps://github.com/junegunn/fzf/releases\nBe careful to choose the right architecture: ${ARCH}.\nThen copy the fzf binary to /home/${userName}/bin"
         fi
 	else
 		# Manjaro packages
