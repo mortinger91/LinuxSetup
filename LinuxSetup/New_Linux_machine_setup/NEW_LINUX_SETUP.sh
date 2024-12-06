@@ -361,7 +361,7 @@ else
 	echo "Do you want to review your git configuration (y/n)?"
 	read -r answer
 	if [ "$answer" == "${answer#[Nn]}" ]; then
-		git config --list
+		git config --list --show-origin
 	fi
 
 	# Configuring git lfs
