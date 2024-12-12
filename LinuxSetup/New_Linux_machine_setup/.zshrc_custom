@@ -8,6 +8,7 @@ eval "$(fzf --zsh)"
 # History related settings
 HISTSIZE=100000
 SAVEHIST=2000000
+setopt HIST_REDUCE_BLANKS
 
 export EDITOR=nano
 
