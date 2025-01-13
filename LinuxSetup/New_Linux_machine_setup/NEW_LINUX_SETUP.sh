@@ -240,6 +240,7 @@ else
 		${PKG_INSTALL} sshfs
 		${PKG_INSTALL} ssl-cert
 		${PKG_INSTALL} telegram-desktop
+		${PKG_INSTALL} tmux
 		${PKG_INSTALL} unzip
 		${PKG_INSTALL} wget
 		${PKG_INSTALL} whereis
