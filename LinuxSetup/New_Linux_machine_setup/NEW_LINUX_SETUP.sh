@@ -267,7 +267,6 @@ else
 		${PKG_INSTALL} python3-venv
 		${PKG_INSTALL} ripgrep
 		${PKG_INSTALL} tcpdump
-		${PKG_INSTALL} tlp
 		${PKG_INSTALL} ssh
 		${PKG_INSTALL} sshfs
 		${PKG_INSTALL} ssl-cert
