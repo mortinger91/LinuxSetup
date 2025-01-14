@@ -110,8 +110,17 @@ else
 
 	mkdir ~/.config >/dev/null 2>&1
 
-	echo -e "# Swipe threshold (0-100)\nswipe_threshold 0\n\n# Gestures\n gesture swipe left 3 xdotool key ctrl+shift+Tab\ngesture swipe right 3 xdotool key ctrl+Tab\ngesture swipe left 4 xdotool key ctrl+w\ngesture swipe right 4 xdotool key ctrl+t\ngesture swipe up 3 xdotool key ctrl+alt+Up\ngesture swipe down 3 xdotool key ctrl+alt+Down" \
-	> ~/.config/libinput-gestures.conf
+    echo -e '# Swipe threshold (0-100)
+swipe_threshold 0\n
+# Gestures:
+gesture swipe left 3 xdotool key ctrl+shift+Tab
+gesture swipe right 3 xdotool key ctrl+Tab
+gesture swipe left 4 xdotool key ctrl+w
+gesture swipe right 4 xdotool key ctrl+t
+# This has no effect due to Kwin KDE6 already using this gesture (ARGH!)
+# gesture swipe up 3 xdotool key ctrl+alt+Up
+# gesture swipe down 3 xdotool key ctrl+alt+Down' \
+    > ~/.config/libinput-gestures.conf
 
 	sudo usermod -a -G input "${userName}"
 
