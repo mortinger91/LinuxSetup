@@ -19,7 +19,7 @@ userName=$(whoami)
 echo "Username is: ${userName}"
 
 if [ "$userName" == "root" ]; then
-    echo "Run the script as your user, not root!"
+    echo "WARNING: Run the script as your user, not root!"
     exit 1
 fi
 
@@ -47,14 +47,29 @@ else
 fi
 
 # Checking if Xorg or Wayland is in use
-if [ "$XDG_SESSION_TYPE" == "x11" ]; then
-	echo "Xorg in use as expected!"
+if [ "$XDG_SESSION_TYPE" == "wayland" ]; then
+	echo "You running Wayland, as expected!"
 else
-	echo "Wayland in use, consider switching to Xorg!"
+	echo "WARNING: you running Xorg, consider switching to Wayland"
 fi
 
 ARCH=$(dpkg --print-architecture)
 echo "Detected architecture: ${ARCH}"
+
+# Check if secure boot is enabled
+if mokutil --sb-state | grep -q "SecureBoot enabled"; then
+    echo "Secure Boot is enabled, as expected!"
+else
+    echo "WARNING: Secure Boot is disabled"
+fi
+
+# Check if hard drive is encrypted
+if lsblk -nf | grep -qi "luk"; then
+    echo "Hard drive seems to be encrypted, as expected!"
+else
+    echo "WARNING: Hard drive seems to not be encrypted"
+fi
+
 
 
 # Section 1
