@@ -164,14 +164,22 @@ else
         touch "$targetDir/.zshrc"
     fi
 
+    echo "    Adding zsh-autosuggestions plugin"
+    ${PKG_INSTALL} git
+    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+
+    echo "    Cloning the best theme ever (michelebira)"
+    ${PKG_INSTALL} wget
+    wget https://raw.githubusercontent.com/mortinger91/michelebira/refs/heads/master/michelebira.zsh-theme -P ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes
+
+	echo "Copying .zshrc_custom and .zsh_custom_aliases files and adding .zshrc_custom link to ~/.zshrc file"
     set -x
-	echo "Copying .zshrc_custom and .zsh_custom_aliases files"
 	cp .zshrc_custom $targetDir/.zshrc_custom
 	cp .zsh_custom_aliases $targetDir/.zsh_custom_aliases
-
-    echo "Adding .zshrc_custom link to ~/.zshrc file"
     echo -e "\n# Custom .zshrc file:\nif [ -f ~/.zshrc_custom ]; then\n  . ~/.zshrc_custom\nfi" >> $targetDir/.zshrc
     set +x
+
+    echo "Remember to add git and zsh-autosuggestions to the plugin section, set the theme to michelebira, uncomment HYPEN_INSENSITIVE and enable COMPLETION_WAITING_DOTS (or don't!)"
 fi
 
 
