@@ -11,6 +11,7 @@ SAVEHIST=2000000
 setopt HIST_REDUCE_BLANKS
 
 export EDITOR=nano
+
 # n: don't show line numbers, a: search is faster, s: cut blank lines
 # i: no case-sensitive search, x8: tab stops to 8 spaces,
 # mouse and wheel-lines: settings for mouse/trackpad scrolling
