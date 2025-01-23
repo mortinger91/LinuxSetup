@@ -97,19 +97,20 @@ fi
 
 
 # Section 2
-echo "  2 - Configuring touchpad gestures:"
+echo "  2a - Configuring touchpad gestures:"
 echo "    Do you want to configure touchpad gestures (y/n)?"
 read -r answer
 if [ "$answer" == "${answer#[Yy]}" ]; then
 	echo -e "    Skipping touchpad gestures configuration\n"
 else
+    currentDir=$(pwd)
 	if [ "$DISTRO" == "Debian" ]; then
 		${PKG_UPDATE}
 		${PKG_INSTALL} make
 
 		# Building libinput-gestures from github
-		mkdir ~/temp
-		cd ~/temp || exit
+		mkdir ~/dev
+		cd ~/dev || exit
 		git clone https://github.com/bulletmark/libinput-gestures.git
 		cd libinput-gestures || exit
 		sudo make install
@@ -121,21 +122,76 @@ else
 
 	${PKG_INSTALL} wmctrl
 	${PKG_INSTALL} libinput-tools
-	${PKG_INSTALL} xdotool
 
-	mkdir ~/.config >/dev/null 2>&1
+    mkdir ~/.config >/dev/null 2>&1
 
-    echo -e '# Swipe threshold (0-100)
+    echo "  2b - Pick either xdotool or ydotool:"
+    echo "    Use (x)dotool on x11 and (y)dotool on Wayland (x/y)?"
+    read -r answer
+    if [ "$answer" == "${answer#[Xx]}" ]; then
+        echo -e "    Configuring touchpad gestures to use xdotool\n"
+
+        ${PKG_INSTALL} xdotool
+
+        echo -e '# Swipe threshold (0-100)
 swipe_threshold 0\n
 # Gestures:
 gesture swipe left 3 xdotool key ctrl+shift+Tab
 gesture swipe right 3 xdotool key ctrl+Tab
 gesture swipe left 4 xdotool key ctrl+w
 gesture swipe right 4 xdotool key ctrl+t
-# This has no effect due to Kwin KDE6 already using this gesture (ARGH!)
+# These have no effect due to Kwin KDE6 already using these gestures (ARGH!)
 # gesture swipe up 3 xdotool key ctrl+alt+Up
 # gesture swipe down 3 xdotool key ctrl+alt+Down' \
-    > ~/.config/libinput-gestures.conf
+        > ~/.config/libinput-gestures.conf
+
+    else
+        echo -e "    Configuring touchpad gestures to use ydotool\n"
+
+        # Installing yodotool
+        ${PKG_INSTALL} scdoc
+        cd ~/dev
+        git clone https://github.com/ReimuNotMoe/ydotool.git
+        mkdir build && cd build
+        cd build
+        cmake ..
+        make
+        sudo make install
+
+        # Creating the ydotool service for the ydotoold daemon
+        sudo touch /etc/systemd/system/ydotool.service
+
+        echo -e '[Unit]
+Description=ydotool daemon
+Documentation=https://github.com/ReimuNotMoe/ydotool\n
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/ydotoold --socket-path=/run/user/1000/.ydotool_socket --socket-perm 0666
+Restart=always\n
+[Install]
+WantedBy=multi-user.target' \
+        | sudo tee /etc/systemd/system/ydotool.service
+
+        # Running the ydotool service
+        sudo systemctl daemon-reload
+        sudo systemctl enable ydotool
+        sudo systemctl start ydotool
+
+        # Checking that the service is running as expected
+        sudo systemctl status ydotool
+
+        echo -e '# Swipe threshold (0-100)
+swipe_threshold 0\n
+# Gestures:
+gesture swipe left 3 ydotool key 29:1 42:1 15:1 15:0 29:0 42:0
+gesture swipe right 3 ydotool key 29:1 15:1 15:0 29:0
+gesture swipe left 4 ydotool key 29:1 17:1 17:0 29:0
+gesture swipe right 4 ydotool key 29:1 20:1 20:0 29:0
+# These have no effect due to Kwin KDE6 already using these gestures (ARGH!)
+# gesture swipe up 3 ydotool key ctrl+alt+Up
+# gesture swipe down 3 ydotool key ctrl+alt+Down' \
+        > ~/.config/libinput-gestures.conf
+    fi
 
 	sudo usermod -a -G input "${userName}"
 
@@ -147,6 +203,8 @@ gesture swipe right 4 xdotool key ctrl+t
 	#   libinput-gestures-setup status
 	# this can be needed (run it in the repo folder):
 	#   sudo libinput-gestures-setup install
+
+    cd $currentDir
 fi
 
 
