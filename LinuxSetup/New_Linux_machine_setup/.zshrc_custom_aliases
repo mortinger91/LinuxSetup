@@ -23,3 +23,5 @@ git log -S "$1" --format="%H" | xargs -I {} git show {} | grep -C 3 "$1"
 alias githist='githistory'
 
 alias xclip='xclip -selection clipboard'
+
+# My Zsh custom aliases:
