@@ -23,8 +23,8 @@ export COMPILER_LAUNCHER=ccache
 export YDOTOOL_SOCKET="/run/user/1000/.ydotool_socket
 
 # Custom aliases definitions:
-if [ -f ~/.zsh_custom_aliases ]; then
- . ~/.zsh_custom_aliases
+if [ -f ~/.zshrc_custom_aliases ]; then
+ . ~/.zshrc_custom_aliases
 fi
 
 # Additional options:
