@@ -12,6 +12,12 @@
 # 7 - ./NEW_LINUX_SETUP.sh
 #####################################################
 
+# General notes:
+## /boot partition:
+#  To be on the safe side, allocate 1GB of space for the /boot partition.
+#  Debian 13 seems to throw a rather annoying warning everytime you update
+#  saying it needs 255MB of free space in the /boot partition.
+#  Also, the space is not enough if want to install more than 2/3 kernels anyway.
 
 echo "New Linux installation setup:"
 
