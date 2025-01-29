@@ -1,6 +1,6 @@
 # Custom .zshrc file:
 
-export PATH=/usr/bin:/home/michele/bin:$PATH
+export PATH=/usr/bin:/home/michele/bin:/snap/bin:$PATH
 
 # Set up fzf key bindings and fuzzy completion
 eval "$(fzf --zsh)"
