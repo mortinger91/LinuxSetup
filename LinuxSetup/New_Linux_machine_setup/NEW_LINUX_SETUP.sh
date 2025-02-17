@@ -486,6 +486,9 @@ if [ "$answer" == "${answer#[Yy]}" ]; then
 	echo -e "    Skipping KDE configuration\n"
 else
 	echo "    Copying KDE configuration..."
+    # THIS IS NOT RECOMMENDED. JUST RE-DO THE CONFIGS MANUALLY,
+    # MESSING WITH THESE FILES CAN LEAD TO A BROKEN CONFIG IF KDE VERSIONS ARE NOT THE SAME.
+    #
 	# COPY THESE FOLDERS AND FILES IN ORDER TO
 	# HAVE THE SAME KDE CONFIGURATION ACROSS MULTIPLE MACHINES
 	#
@@ -546,7 +549,10 @@ else
 	sudo reboot now
 fi
 
-# Add scripts from BootScripts repository for a machine specific configuration:
-# Go to KDE settings "Startup and Shutdown"/"Autostart" and add:
-# /home/michele/dev/BootScripts/fixKDE/fixKDE.sh
-# Configure "MX Ergo Multi-Device Trackball " device using https://github.com/PixlOne/logiops
+# ON BOOT SCRIPTS:
+# Add scripts from BootScripts repository (if necessary).
+# Go to KDE settings "Startup and Shutdown"/"Autostart" and add
+# `/home/michele/dev/BootScripts/onBoot.sh`
+#
+# LOGITECH TRACKBALL MOUSE:
+# Configure "MX Ergo Multi-Device Trackball" buttons using https://github.com/PixlOne/logiops
