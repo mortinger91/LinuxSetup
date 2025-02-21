@@ -243,9 +243,12 @@ else
         touch "$targetDir/.zshrc"
     fi
 
-    echo "    Adding zsh-autosuggestions plugin"
     ${PKG_INSTALL} git
+    echo "    Cloning zsh-autosuggestions plugin"
     git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+
+    echo "    Cloning zsh-syntax-highlighting plugin"
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 
     echo "    Cloning the best theme ever (michelebira)"
     ${PKG_INSTALL} wget
@@ -258,7 +261,11 @@ else
     echo -e "\n# Custom .zshrc file:\nif [ -f ~/.zshrc_custom ]; then\n  . ~/.zshrc_custom\nfi" >> $targetDir/.zshrc
     set +x
 
-    echo "Remember to add git and zsh-autosuggestions to the plugin section, set the theme to michelebira, uncomment HYPEN_INSENSITIVE and enable COMPLETION_WAITING_DOTS (or don't!)"
+    echo "Before: $(grep "^plugins=(" ~/.zshrc)"
+    sed -i '/^plugins=(/c\plugins=(git zsh-autosuggestions zsh-syntax-highlighting)' ~/.zshrc
+    echo "After: $(grep "^plugins=" ~/.zshrc)"
+
+    echo "Remember to set: ZSH_THEME=\"michelebira\", HYPHEN_INSENSITIVE=\"true\" and COMPLETION_WAITING_DOTS=\"true\" (or don't!)"
 fi
 
 
