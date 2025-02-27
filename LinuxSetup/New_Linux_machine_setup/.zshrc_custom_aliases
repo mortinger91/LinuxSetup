@@ -3,6 +3,8 @@ alias ls='ls -lah --color'
 
 alias cp='cp -i'
 
+alias df='df -h'
+
 alias up='sudo apt update && sudo apt full-upgrade -y'
 
 alias myip='curl ipecho.net/plain; echo'
