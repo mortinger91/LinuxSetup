@@ -284,6 +284,7 @@ else
 		${PKG_INSTALL} apt-utils
 		${PKG_INSTALL} autoconf
 		${PKG_INSTALL} bash-completion
+		${PKG_INSTALL} bat
 		${PKG_INSTALL} bear
 		${PKG_INSTALL} bpfcc-tools
 		${PKG_INSTALL} bpftrace
@@ -342,6 +343,7 @@ else
 		${PKG_INSTALL} sshfs
 		${PKG_INSTALL} ssl-cert
 		${PKG_INSTALL} telegram-desktop
+		${PKG_INSTALL} trash-cli
 		${PKG_INSTALL} tmux
 		${PKG_INSTALL} unzip
 		${PKG_INSTALL} wget

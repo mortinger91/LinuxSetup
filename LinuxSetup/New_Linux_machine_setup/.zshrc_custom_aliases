@@ -1,9 +1,15 @@
-# My Zsh aliases:
+# My zsh common aliases:
 alias ls='ls -lah --color'
 
 alias cp='cp -i'
 
+alias mv='mv -i'
+
 alias df='df -h'
+
+alias bat='batcat'
+
+alias xclip='xclip -selection clipboard'
 
 alias up='sudo apt update && sudo apt full-upgrade -y'
 
@@ -11,14 +17,13 @@ alias myip='curl ipecho.net/plain; echo'
 
 function fzf_preview() {
 if [ $# -eq 0 ]; then
-    fzf --preview "echo -e \"\033[31m~~~\033[0m\"; echo {}; echo -e \"\033[31m~~~\033[0m\"; cat {}" --preview-window wrap | xclip -selection clipboard
+    fzf --preview "batcat --color=always --style=numbers,header --line-range=:500 {}" --preview-window wrap | xclip -selection clipboard
 elif [ $# -eq 1 ]; then
-    find "$1" -type f | fzf --preview "echo -e \"\033[31m~~~\033[0m\"; echo {}; echo -e \"\033[31m~~~\033[0m\"; cat {}" --preview-window wrap | xclip -selection clipboard
+    find "$1" -type f | fzf --preview "batcat --color=always --style=numbers,header --line-range=:500 {}" --preview-window wrap | xclip -selection clipboard
 else
     echo "Error: Expected 0 or 1 arguments, got $#" >&2
     return 1
 fi
-}
 alias lsf='fzf_preview'
 
 function githistory() {
@@ -26,6 +31,4 @@ git log -S "$1" --format="%H" | xargs -I {} git show {} | grep -C 3 "$1"
 }
 alias githist='githistory'
 
-alias xclip='xclip -selection clipboard'
-
-# My Zsh custom aliases:
+# My zsh system-specific aliases:
