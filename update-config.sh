@@ -8,17 +8,15 @@ function print_color() {
     local text=$2
 
     case "$color" in
-        black)   color_code=30 ;;
-        red)     color_code=31 ;;
-        green)   color_code=32 ;;
-        yellow)  color_code=33 ;;
-        blue)    color_code=34 ;;
-        magenta) color_code=35 ;;
-        cyan)    color_code=36 ;;
-        white)   color_code=37 ;;
-        *)       color_code=37 ;;
+        red)     color_code=0;31 ;;
+        yellow)  color_code=1;33 ;;
+        blue)    color_code=0;34 ;;
+        magenta) color_code=0;35 ;;
+        cyan)    color_code=0;36 ;;
+        white)   color_code=0;37 ;;
+        *)       color_code=0;37 ;;
     esac
-    echo -e "\033[0;${color_code}m${text}\033[0m"
+    echo -e "\033[${color_code}m${text}\033[0m"
 }
 
 # Update a file
