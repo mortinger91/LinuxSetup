@@ -21,7 +21,7 @@ function printcolor() {
     echo -e "\033[0;${color_code}m${text}\033[0m"
 }
 
-set -e
+set -ex
 
 # Update .zshrc_custom and .zshrc_custom_aliases files
 echo "Showing diff between local and remote .zshrc_custom files:"
@@ -34,6 +34,6 @@ else
     mv -i .zshrc_custom ~/.zshrc_custom
 fi
 
-set +e
+set +ex
 
 echo "Config was updated!!!!!"
