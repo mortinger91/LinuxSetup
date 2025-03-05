@@ -11,7 +11,7 @@ alias bat='batcat'
 
 alias grep='rg'
 
-if command -v trash &> /dev/null; then
+if command -v trash >/dev/null 2>&1; then
     alias rm='trash -v'
 else
     alias rm='rm -i'  # fallback to interactive remove
@@ -30,7 +30,7 @@ alias up='sudo apt update && sudo apt full-upgrade -y'
 INTERFACE='wlp61s0'
 function whatsmyip () {
     # Internal IP Lookup.
-    if command -v ip &> /dev/null; then
+    if command -v ip >/dev/null 2>&1; then
         echo -n "Internal IP: "
         ip addr show $INTERFACE | grep "inet " | awk '{print $2}' | cut -d/ -f1
     else
