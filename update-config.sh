@@ -26,10 +26,10 @@ set -e
 # Update .zshrc_custom and .zshrc_custom_aliases files
 echo "Showing diff between local and remote .zshrc_custom files:"
 git --no-pager diff --no-index --color=always ~/.zshrc_custom .zshrc_custom
-printcolor("yellow", "Do you want to update .zshrc_custom (y/n)?")
+printcolor yellow "Do you want to update .zshrc_custom (y/n)?"
 read -r answer
 if [ "$answer" == "${answer#[Yy]}" ]; then
-    printcolor("red", "Not updating .zshrc_custom")
+    printcolor red "Not updating .zshrc_custom"
 else
     mv -i .zshrc_custom ~/.zshrc_custom
 fi
