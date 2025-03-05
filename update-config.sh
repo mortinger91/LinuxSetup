@@ -21,18 +21,23 @@ function printcolor() {
     echo -e "\033[0;${color_code}m${text}\033[0m"
 }
 
-set -ex
+
 
 # Update .zshrc_custom and .zshrc_custom_aliases files
 echo "Showing diff between local and remote .zshrc_custom files:"
 git --no-pager diff --no-index --color=always ~/.zshrc_custom .zshrc_custom
-echo "ciao"
-printcolor yellow "Do you want to update .zshrc_custom (y/n)?"
-read -r answer
-if [ "$answer" == "${answer#[Yy]}" ]; then
-    printcolor red "Not updating .zshrc_custom"
-else
-    mv -i .zshrc_custom ~/.zshrc_custom
+diff_found=$?
+
+set -e
+
+if [ $diff_found -ne 0 ]; then
+    printcolor yellow "Do you want to update .zshrc_custom (y/n)?"
+    read -r answer
+    if [ "$answer" == "${answer#[Yy]}" ]; then
+        printcolor red "Not updating .zshrc_custom"
+    else
+        mv -i .zshrc_custom ~/.zshrc_custom
+    fi
 fi
 
 set +ex
