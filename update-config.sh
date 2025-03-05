@@ -8,7 +8,7 @@ function print_color() {
     local text=$2
 
     case "$color" in
-        red)     color_code=0;31 ;;
+        red)     color_code=1;31 ;;
         green)   color_code=0;32 ;;
         yellow)  color_code=1;33 ;;
         blue)    color_code=0;34 ;;
