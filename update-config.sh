@@ -29,7 +29,11 @@ function file_update() {
 
     if [ $diff_found -ne 0 ]; then
         echo "Showing diff between local and remote $file file:"
-        git --no-pager diff --no-index --color=always ~/$file $file
+        if command -v code >/dev/null 2>&1; then
+            code --diff ~/$file $file
+        else
+            git --no-pager diff --no-index --color=always ~/$file $file
+        fi
         print_color yellow "Do you want to update $file (y/n)?"
         read -r answer
         if [ "$answer" == "${answer#[Yy]}" ]; then
