@@ -28,8 +28,6 @@ function file_update() {
     git diff ~/$file $file >/dev/null 2>&1
     diff_found=$?
 
-    set -e
-
     if [ $diff_found -ne 0 ]; then
         echo "Showing diff between local and remote $file file:"
         git --no-pager diff --no-index --color=always ~/$file $file
@@ -41,8 +39,6 @@ function file_update() {
             mv -i $file ~/$file
         fi
     fi
-
-    set +e
 }
 
 file_update .zshrc_custom
