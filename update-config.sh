@@ -24,13 +24,14 @@ function printcolor() {
 
 
 # Update .zshrc_custom and .zshrc_custom_aliases files
-echo "Showing diff between local and remote .zshrc_custom files:"
-git --no-pager diff --no-index --color=always ~/.zshrc_custom .zshrc_custom
+git diff ~/.zshrc_custom .zshrc_custom >/dev/null 2>&1
 diff_found=$?
 
 set -e
 
 if [ $diff_found -ne 0 ]; then
+    echo "Showing diff between local and remote .zshrc_custom files:"
+    git --no-pager diff --no-index --color=always ~/.zshrc_custom .zshrc_custom
     printcolor yellow "Do you want to update .zshrc_custom (y/n)?"
     read -r answer
     if [ "$answer" == "${answer#[Yy]}" ]; then
@@ -40,6 +41,6 @@ if [ $diff_found -ne 0 ]; then
     fi
 fi
 
-set +ex
+set +e
 
-echo "Config was updated!!!!!"
+printcolor white "Config was updated!"
