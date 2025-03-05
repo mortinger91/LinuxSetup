@@ -1,3 +1,3 @@
 #!/bin/bash
 
-echo "Config was updated!!"
+echo "Config was updated!!!"
