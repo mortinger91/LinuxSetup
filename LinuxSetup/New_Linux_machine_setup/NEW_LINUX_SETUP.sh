@@ -129,7 +129,7 @@ else
 	${PKG_INSTALL} wmctrl
 	${PKG_INSTALL} libinput-tools
 
-    mkdir ~/.config >/dev/null 2>&1
+    mkdir -p ~/.config >/dev/null 2>&1
 
     echo "  2b - Pick either xdotool or ydotool:"
     echo "    Use (x)dotool on x11 and (y)dotool on Wayland (x/y)?"
@@ -349,6 +349,20 @@ else
 		${PKG_INSTALL} wget
 		${PKG_INSTALL} whereis
 		${PKG_INSTALL} xclip
+
+
+
+        echo "    Do you want to install and configure Xozide (y/n)?"
+		read -r answer
+		if [ "$answer" == "${answer#[Yy]}" ]; then
+			echo "Skipping Xozide"
+		else
+            curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+
+            mkdir -p ~/.config/bat
+            echo -e "--map-syntax '.zshrc*:Bourne Again Shell (bash)'" \
+            > ~/.config/bat/config
+        fi
 
 		echo "    Do you want to install Visual Studio Code (y/n)?"
 		read -r answer
