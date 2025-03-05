@@ -27,7 +27,7 @@ alias xclip='xclip -selection clipboard'
 
 alias up='sudo apt update && sudo apt full-upgrade -y'
 
-export INTERFACE='wlp61s0'
+INTERFACE='wlp61s0'
 function whatsmyip () {
     # Internal IP Lookup.
     if command -v ip &> /dev/null; then
@@ -47,19 +47,19 @@ function whatsmyip () {
 alias myip="whatsmyip"
 
 function fzf_preview() {
-if [ $# -eq 0 ]; then
-    fzf --preview "batcat --color=always --style=numbers,header --line-range=:500 {}" --preview-window wrap | xclip -selection clipboard
-elif [ $# -eq 1 ]; then
-    find "$1" -type f | fzf --preview "batcat --color=always --style=numbers,header --line-range=:500 {}" --preview-window wrap | xclip -selection clipboard
-else
-    echo "Error: Expected 0 or 1 arguments, got $#" >&2
-    return 1
-fi
+    if [ $# -eq 0 ]; then
+        fzf --preview "batcat --color=always --style=numbers,header --line-range=:500 {}" --preview-window wrap | xclip -selection clipboard
+    elif [ $# -eq 1 ]; then
+        find "$1" -type f | fzf --preview "batcat --color=always --style=numbers,header --line-range=:500 {}" --preview-window wrap | xclip -selection clipboard
+    else
+        echo "Error: Expected 0 or 1 arguments, got $#" >&2
+        return 1
+    fi
 }
 alias lsf='fzf_preview'
 
 function githistory() {
-git log -S "$1" --format="%H" | xargs -I {} git show {} | grep -C 3 "$1"
+    git log -S "$1" --format="%H" | xargs -I {} git show {} | grep -C 3 "$1"
 }
 alias githist='githistory'
 
