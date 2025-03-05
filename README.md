@@ -1,6 +1,6 @@
 # LinuxSetup
 Setup of a freshly installed Linux system, how I like it.  
-Supports Debian and (kind of) Manjaro.
+Supports Debian-like systems.
 
 How to download and run this script:  
 1 - `su -c "apt update"`  
