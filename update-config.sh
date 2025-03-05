@@ -26,6 +26,7 @@ set -ex
 # Update .zshrc_custom and .zshrc_custom_aliases files
 echo "Showing diff between local and remote .zshrc_custom files:"
 git --no-pager diff --no-index --color=always ~/.zshrc_custom .zshrc_custom
+echo "ciao"
 printcolor yellow "Do you want to update .zshrc_custom (y/n)?"
 read -r answer
 if [ "$answer" == "${answer#[Yy]}" ]; then
