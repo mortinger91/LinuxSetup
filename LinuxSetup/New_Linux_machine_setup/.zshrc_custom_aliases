@@ -1,5 +1,5 @@
 # My zsh common aliases:
-alias ls='ls -lah --color'
+alias ls='ls -lahF --color=always' #-a shows all file, -l long list format, -h human-readable, -F add symbols like / for dirs, --color forces colored output
 
 alias cp='cp -i'
 
@@ -9,11 +9,42 @@ alias df='df -h'
 
 alias bat='batcat'
 
+alias grep='rg'
+
+if command -v trash &> /dev/null; then
+    alias rm='trash -v'
+else
+    alias rm='rm -i'  # fallback to interactive remove
+fi
+
+alias mkdir='mkdir -p' #-p create more than one directory if needed
+
+alias ps='ps auxf' #-a shows all users' processes, -u user-oriented output, -x includes processes without TTY, -f shows process hierarchy (forest)
+
+alias ..='cd ..'
+
 alias xclip='xclip -selection clipboard'
 
 alias up='sudo apt update && sudo apt full-upgrade -y'
 
-alias myip='curl ipecho.net/plain; echo'
+export INTERFACE='wlp61s0'
+function whatsmyip () {
+    # Internal IP Lookup.
+    if command -v ip &> /dev/null; then
+        echo -n "Internal IP: "
+        ip addr show $INTERFACE | grep "inet " | awk '{print $2}' | cut -d/ -f1
+    else
+        echo -n "Internal IP: "
+        ifconfig $INTERFACE | grep "inet " | awk '{print $2}'
+    fi
+
+    # External IP Lookup
+    echo -n "External IP: "
+    # curl -s ifconfig.me
+    curl -s ipecho.net/plain
+    echo
+}
+alias myip="whatsmyip"
 
 function fzf_preview() {
 if [ $# -eq 0 ]; then
@@ -24,6 +55,7 @@ else
     echo "Error: Expected 0 or 1 arguments, got $#" >&2
     return 1
 fi
+}
 alias lsf='fzf_preview'
 
 function githistory() {

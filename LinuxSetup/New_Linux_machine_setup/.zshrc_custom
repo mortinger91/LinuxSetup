@@ -1,9 +1,12 @@
 # Custom .zshrc file:
 
-export PATH=/usr/bin:/home/michele/bin:/snap/bin:$PATH
+export PATH=/usr/bin:/home/michele/bin:/home/michele/.local/bin:/snap/bin:$PATH
 
 # Set up fzf key bindings and fuzzy completion
 eval "$(fzf --zsh)"
+
+# Set up zoxide smart directory navigator
+eval "$(zoxide init zsh)"
 
 # History related settings
 HISTSIZE=100000
