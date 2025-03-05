@@ -25,9 +25,6 @@ export COMPILER_LAUNCHER=ccache
 # Needed by ydotool to communicate with the `ydotoold` daemon
 export YDOTOOL_SOCKET="/run/user/1000/.ydotool_socket"
 
-# The value is set by the init-setup.sh script
-export CONFIG_DIR=""
-
 # My zsh system-specific options:
 if [ -f ~/.zshrc_custom_local ]; then
  . ~/.zshrc_custom_local
