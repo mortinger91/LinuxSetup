@@ -6,7 +6,7 @@
 set -e
 
 # Update .zshrc_custom and .zshrc_custom_aliases files
-echo "Showing diff between local and remote .zshrc_custom files"
+echo "Showing diff between local and remote .zshrc_custom files:"
 git --no-pager diff --no-index --color=always ~/.zshrc_custom .zshrc_custom
 
 set +e
