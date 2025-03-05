@@ -23,7 +23,10 @@ export LESS='-nasix8 --mouse --wheel-lines=2'
 export COMPILER_LAUNCHER=ccache
 
 # Needed by ydotool to communicate with the `ydotoold` daemon
-export YDOTOOL_SOCKET="/run/user/1000/.ydotool_socket
+export YDOTOOL_SOCKET="/run/user/1000/.ydotool_socket"
+
+# The value is set by the init-setup.sh script
+export CONFIG_DIR=""
 
 # Custom aliases definitions:
 if [ -f ~/.zshrc_custom_aliases ]; then

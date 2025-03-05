@@ -1,4 +1,17 @@
 # My zsh common aliases:
+function update_config() {
+    # save current dir
+    current_dir=$(pwd)
+    # cd to git linux setup dir.
+    # assuming this has been setup with initial-setup.sh
+    cd $CONFIG_DIR
+    git switch master >/dev/null 2>&1
+    git pull >/dev/null 2>&1
+    ./update-config.sh
+    cd $current_dir
+}
+alias update-config='update_config'
+
 alias ls='ls -lahF --color=always' #-a shows all file, -l long list format, -h human-readable, -F add symbols like / for dirs, --color forces colored output
 
 alias cp='cp -i'
