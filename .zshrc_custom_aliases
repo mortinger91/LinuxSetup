@@ -5,15 +5,15 @@
 # so that it can pull also the script changes
 function update_config() {
     # Save the current dir
-    current_dir=$(pwd)
+    CURRENT_DIR=$(pwd)
     # Moving to the git root folder
-    # This variable is during the initial setup
+    # CONFIG_DIR is defined in .zshrc
     cd $CONFIG_DIR
     # Pulling the latest changes
     git switch master >/dev/null 2>&1
     git pull >/dev/null 2>&1
     ./update-config.sh
-    cd $current_dir
+    cd $CURRENT_DIR
 }
 alias update-config='update_config'
 
@@ -45,8 +45,8 @@ alias xclip='xclip -selection clipboard'
 
 alias up='sudo apt update && sudo apt full-upgrade -y'
 
-INTERFACE='wlp61s0'
-function whatsmyip () {
+# INTERFACE is defined in .zshrc
+function whatsmyip() {
     # Internal IP Lookup.
     if command -v ip >/dev/null 2>&1; then
         echo -n "Internal IP: "
@@ -76,10 +76,10 @@ function fzf_preview() {
 }
 alias lsf='fzf_preview'
 
-function githistory() {
+function git_history() {
     git log -S "$1" --format="%H" | xargs -I {} git show {} | grep -C 3 "$1"
 }
-alias githist='githistory'
+alias githist='git_history'
 
 # My zsh system-specific aliases:
 if [ -f ~/.zshrc_custom_aliases_local ]; then

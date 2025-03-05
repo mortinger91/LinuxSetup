@@ -3,7 +3,7 @@
 # Assume we are running this script after the `update_config()`
 # bash function has pulled the latest changes from the git remote.
 
-function printcolor() {
+function print_color() {
     local color=$1
     local text=$2
 
@@ -21,26 +21,31 @@ function printcolor() {
     echo -e "\033[0;${color_code}m${text}\033[0m"
 }
 
+# Update a file
+function file_update() {
+    local file=$1
 
+    git diff ~/$file $file >/dev/null 2>&1
+    diff_found=$?
 
-# Update .zshrc_custom and .zshrc_custom_aliases files
-git diff ~/.zshrc_custom .zshrc_custom >/dev/null 2>&1
-diff_found=$?
+    set -e
 
-set -e
-
-if [ $diff_found -ne 0 ]; then
-    echo "Showing diff between local and remote .zshrc_custom files:"
-    git --no-pager diff --no-index --color=always ~/.zshrc_custom .zshrc_custom
-    printcolor yellow "Do you want to update .zshrc_custom (y/n)?"
-    read -r answer
-    if [ "$answer" == "${answer#[Yy]}" ]; then
-        printcolor red "Not updating .zshrc_custom"
-    else
-        mv -i .zshrc_custom ~/.zshrc_custom
+    if [ $diff_found -ne 0 ]; then
+        echo "Showing diff between local and remote $file file:"
+        git --no-pager diff --no-index --color=always ~/$file $file
+        print_color yellow "Do you want to update $file (y/n)?"
+        read -r answer
+        if [ "$answer" == "${answer#[Yy]}" ]; then
+            print_color red "Not updating $file"
+        else
+            mv -i $file ~/$file
+        fi
     fi
-fi
 
-set +e
+    set +e
+}
 
-printcolor white "Config was updated!"
+file_update .zshrc_custom
+file_update .zshrc_custom_aliases
+
+print_color white "Config was updated!"
