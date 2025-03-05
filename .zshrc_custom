@@ -1,4 +1,4 @@
-# Custom .zshrc file:
+### My zsh common options ###
 
 export PATH=/usr/bin:/home/michele/.local/bin:/snap/bin:$PATH
 
@@ -28,9 +28,12 @@ export YDOTOOL_SOCKET="/run/user/1000/.ydotool_socket"
 # The value is set by the init-setup.sh script
 export CONFIG_DIR=""
 
-# Custom aliases definitions:
+# My zsh system-specific options:
+if [ -f ~/.zshrc_custom_local ]; then
+ . ~/.zshrc_custom_local
+fi
+
+# My zsh common aliases:
 if [ -f ~/.zshrc_custom_aliases ]; then
  . ~/.zshrc_custom_aliases
 fi
-
-# Additional options:

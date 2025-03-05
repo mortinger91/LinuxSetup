@@ -1,10 +1,15 @@
-# My zsh common aliases:
+### My zsh common aliases ###
+
+# This function needs to pull the latest changes from git
+# before the update-config.sh script runs,
+# so that it can pull also the script changes
 function update_config() {
-    # save current dir
+    # Save the current dir
     current_dir=$(pwd)
-    # cd to git linux setup dir.
-    # assuming this has been setup with initial-setup.sh
+    # Moving to the git root folder
+    # This variable is during the initial setup
     cd $CONFIG_DIR
+    # Pulling the latest changes
     git switch master >/dev/null 2>&1
     git pull >/dev/null 2>&1
     ./update-config.sh
@@ -77,3 +82,6 @@ function githistory() {
 alias githist='githistory'
 
 # My zsh system-specific aliases:
+if [ -f ~/.zshrc_custom_aliases_local ]; then
+ . ~/.zshrc_custom_aliases_local
+fi
