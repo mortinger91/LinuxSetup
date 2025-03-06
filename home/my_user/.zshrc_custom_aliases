@@ -4,16 +4,20 @@
 # before the update-config.sh script runs,
 # so that it can pull also the script changes
 function update_config() {
-    # Save the current dir
-    CURRENT_DIR=$(pwd)
-    # Moving to the git root folder
-    # CONFIG_DIR is defined in .zshrc
-    cd $CONFIG_DIR
-    # Pulling the latest changes
-    git switch master >/dev/null 2>&1
-    git pull >/dev/null 2>&1
-    ./update-config.sh
-    cd $CURRENT_DIR
+  if [ "$(whoami)" = "root" ]; then
+    echo "This command should not be run as root"
+    return 1
+  fi
+  # Save the current dir
+  CURRENT_DIR=$(pwd)
+  # Moving to the git root folder
+  # CONFIG_DIR is defined in .zshrc
+  cd $CONFIG_DIR
+  # Pulling the latest changes
+  git switch master >/dev/null 2>&1
+  git pull >/dev/null 2>&1
+  ./update-config.sh
+  cd $CURRENT_DIR
 }
 alias update-config='update_config'
 
@@ -30,9 +34,9 @@ alias bat='batcat'
 alias grep='rg'
 
 if command -v trash >/dev/null 2>&1; then
-    alias rm='trash -v'
+  alias rm='trash -v'
 else
-    alias rm='rm -i'  # fallback to interactive remove
+  alias rm='rm -i'  # fallback to interactive remove
 fi
 
 alias mkdir='mkdir -p' #-p create all the nested directories
@@ -47,41 +51,41 @@ alias up='sudo apt update && sudo apt full-upgrade -y'
 
 # INTERFACE is defined in .zshrc
 function whatsmyip() {
-    # Internal IP Lookup.
-    if command -v ip >/dev/null 2>&1; then
-        echo -n "Internal IP: "
-        ip addr show $INTERFACE | grep "inet " | awk '{print $2}' | cut -d/ -f1
-    else
-        echo -n "Internal IP: "
-        ifconfig $INTERFACE | grep "inet " | awk '{print $2}'
-    fi
+  # Internal IP Lookup.
+  if command -v ip >/dev/null 2>&1; then
+    echo -n "Internal IP: "
+    ip addr show $INTERFACE | grep "inet " | awk '{print $2}' | cut -d/ -f1
+  else
+    echo -n "Internal IP: "
+    ifconfig $INTERFACE | grep "inet " | awk '{print $2}'
+  fi
 
-    # External IP Lookup
-    echo -n "External IP: "
-    # curl -s ifconfig.me
-    curl -s ipecho.net/plain
-    echo
+  # External IP Lookup
+  echo -n "External IP: "
+  # curl -s ifconfig.me
+  curl -s ipecho.net/plain
+  echo
 }
 alias myip="whatsmyip"
 
 function fzf_preview() {
-    if [ $# -eq 0 ]; then
-        fzf --preview "batcat --color=always --style=numbers,header --line-range=:500 {}" --preview-window wrap | xclip -selection clipboard
-    elif [ $# -eq 1 ]; then
-        find "$1" -type f | fzf --preview "batcat --color=always --style=numbers,header --line-range=:500 {}" --preview-window wrap | xclip -selection clipboard
-    else
-        echo "Error: Expected 0 or 1 arguments, got $#" >&2
-        return 1
-    fi
+  if [ $# -eq 0 ]; then
+    fzf --preview "batcat --color=always --style=numbers,header --line-range=:500 {}" --preview-window wrap | xclip -selection clipboard
+  elif [ $# -eq 1 ]; then
+    find "$1" -type f | fzf --preview "batcat --color=always --style=numbers,header --line-range=:500 {}" --preview-window wrap | xclip -selection clipboard
+  else
+    echo "Error: Expected 0 or 1 arguments, got $#" >&2
+    return 1
+  fi
 }
 alias lsf='fzf_preview'
 
 function git_history() {
-    git log -S "$1" --format="%H" | xargs -I {} git show {} | grep -C 3 "$1"
+  git log -S "$1" --format="%H" | xargs -I {} git show {} | grep -C 3 "$1"
 }
 alias githist='git_history'
 
 # My zsh system-specific aliases:
 if [ -f ~/.zshrc_custom_aliases_local ]; then
- . ~/.zshrc_custom_aliases_local
+  . ~/.zshrc_custom_aliases_local
 fi

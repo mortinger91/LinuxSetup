@@ -1,7 +1,12 @@
 #!/bin/bash
 
 echo "First setup completed!"
+
+# set CONFIG_DIR and INTERFACE export vars
 dirname ${BASH_SOURCE[0]} # save this to CONFIG_DIR
 
-# set CONFIG_DIR and INTERFACE
-# comment source $ZSH/oh-my-zsh.sh from zshrc
+
+# Commented out since it's launched in zshrc_custom
+# source $ZSH/oh-my-zsh.sh
+#
+# comment this from zshrc using sed, add comment that explains that it's moved to zshrc_custom
