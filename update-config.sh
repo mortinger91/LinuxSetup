@@ -31,7 +31,7 @@ function file_update() {
   diff_found=$?
 
   if [ $diff_found -ne 0 ]; then
-    echo "Showing diff between local and remote $file file:"
+    echo "Showing diff between local and remote $(basename "$fileDest") file:"
     if command -v code >/dev/null 2>&1; then
       code --diff $fileDest $fileSource
     else
@@ -40,7 +40,7 @@ function file_update() {
     print_color yellow "Do you want to update $fileDest (y/n)?"
     read -r answer
     if [ "$answer" == "${answer#[Yy]}" ]; then
-      print_color red "Not updating $fileDest"
+      print_color red "Not updating $(basename "$fileDest")"
     else
       sudo cp -i -p $fileSource $fileDest
     fi
