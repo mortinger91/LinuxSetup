@@ -2,6 +2,14 @@
 
 export PATH=/usr/bin:/home/michele/.local/bin:/snap/bin:$PATH
 
+# Setting my custom oh-my-zsh settings
+ZSH_THEME="michelebira"
+HYPHEN_INSENSITIVE="true"
+zstyle ':omz:update' mode reminder
+zstyle ':omz:update' frequency 14
+COMPLETION_WAITING_DOTS="true"
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
+
 # Set up fzf key bindings and fuzzy completion
 eval "$(fzf --zsh)"
 
@@ -30,7 +38,9 @@ if [ -f ~/.zshrc_custom_local ]; then
  . ~/.zshrc_custom_local
 fi
 
-# My zsh common aliases :
+source $ZSH/oh-my-zsh.sh
+
+# My zsh common aliases:
 if [ -f ~/.zshrc_custom_aliases ]; then
  . ~/.zshrc_custom_aliases
 fi
