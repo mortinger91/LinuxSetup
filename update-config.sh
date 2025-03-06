@@ -24,7 +24,7 @@ function print_color() {
 function file_update() {
     local file=$1
 
-    git diff ~/$file $file >/dev/null 2>&1
+    git diff /$file $file >/dev/null 2>&1
     diff_found=$?
 
     if [ $diff_found -ne 0 ]; then
@@ -39,12 +39,21 @@ function file_update() {
         if [ "$answer" == "${answer#[Yy]}" ]; then
             print_color red "Not updating $file"
         else
-            cp -i $file ~/$file
+            sudo cp -i -p $file ~/$file
         fi
     fi
 }
 
-file_update .zshrc_custom
-file_update .zshrc_custom_aliases
+# All the files that I want to update
+config_files=(
+  "home/my_user/.zshrc_custom"
+  "home/my_user/.zshrc_custom_aliases"
+  "etc/bluetooth/main.conf"
+  "home/my_user/.config/bat/config"
+)
+
+for config_file in "${config_files[@]}"; do
+  file_update "$config_files"
+done
 
 print_color white "Config was updated!"
