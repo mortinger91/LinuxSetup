@@ -105,7 +105,6 @@ function installManualPackages() {
   wget https://dl.google.com/linux/direct/google-chrome-stable_current_${ARCH}.deb
   sudo dpkg -i google-chrome-stable_current_${ARCH}.deb
 
-
   echo "Install Wireshark"
   ${PKG_INSTALL} wireshark
   sudo usermod -a -G wireshark "${userName}"
