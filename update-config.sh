@@ -22,9 +22,10 @@ function print_color() {
 
 # Update a file
 function file_update() {
-  local fileSource=$1
+  local fileSource="$1"
   # Substitute the string "my_user" with the actual user
-  local fileDest=="/${$1//my_user/$(whoami)}"
+  local fileDest=="/$1"
+  fileDest=="${$fileDest//my_user/$(whoami)}"
 
   git diff $fileDest $fileSource >/dev/null 2>&1
   diff_found=$?
