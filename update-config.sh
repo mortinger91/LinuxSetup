@@ -22,40 +22,40 @@ function print_color() {
 
 # Update a file
 function file_update() {
-  local file=$1
+  local fileSource=$1
+  # Substitute the string "my_user" with the actual user
+  local fileDest=="/${$1//my_user/$(whoami)}"
 
-  git diff /$file $file >/dev/null 2>&1
+  git diff $fileDest $fileSource >/dev/null 2>&1
   diff_found=$?
 
   if [ $diff_found -ne 0 ]; then
     echo "Showing diff between local and remote $file file:"
     if command -v code >/dev/null 2>&1; then
-      code --diff /$file $file
+      code --diff $fileDest $fileSource
     else
-      git --no-pager diff --no-index --color=always ~/$file $file
+      git --no-pager diff --no-index --color=always $fileDest $fileSource
     fi
-    print_color yellow "Do you want to update $file (y/n)?"
+    print_color yellow "Do you want to update $fileDest (y/n)?"
     read -r answer
     if [ "$answer" == "${answer#[Yy]}" ]; then
-      print_color red "Not updating $file"
+      print_color red "Not updating $fileDest"
     else
-      sudo cp -i -p $file ~/$file
+      sudo cp -i -p $fileSource $fileDest
     fi
   fi
 }
 
 # All the files that I want to update
-config_files=(
+files=(
   "home/my_user/.zshrc_custom"
   "home/my_user/.zshrc_custom_aliases"
   "etc/bluetooth/main.conf"
   "home/my_user/.config/bat/config"
 )
 
-for config_file in "${config_files[@]}"; do
-  # Substitute the string "my_user" with the actual user
-  file="${file//my_user/$(whoami)}"
-  file_update "$config_file"
+for file in "${files[@]}"; do
+  file_update "$file"
 done
 
 print_color white "Config was updated!"
