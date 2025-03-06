@@ -30,7 +30,7 @@ function file_update() {
   if [ $diff_found -ne 0 ]; then
     echo "Showing diff between local and remote $file file:"
     if command -v code >/dev/null 2>&1; then
-      code --diff ~/$file $file
+      code --diff /$file $file
     else
       git --no-pager diff --no-index --color=always ~/$file $file
     fi
