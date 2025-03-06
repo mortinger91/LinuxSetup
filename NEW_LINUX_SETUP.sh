@@ -31,9 +31,8 @@ echo "  0 - initial setup:"
 # Detecting distribution (Debian or Manjaro)
 apt --version >/dev/null 2>&1
 if [ $? -ne 0 ]; then
-	echo "Detected Manjaro"
-	PKG_INSTALL="sudo pacman -S --noconfirm"
-	DISTRO="Manjaro"
+	echo "Detected non Debian system, exiting the script"
+	exit 1
 else
 	echo "Detected Debian"
 	PKG_INSTALL="sudo apt install -y"
@@ -231,6 +230,23 @@ else
         touch "$targetDir/.zshrc"
     fi
 
+    echo "Copying .zshrc_custom and .zsh_custom_aliases files"
+    set -x
+	cp .zshrc_custom $targetDir/.zshrc_custom
+	cp .zsh_custom_aliases $targetDir/.zsh_custom_aliases
+
+    # TODO: Integrate this part into update-config
+
+    # Possibly add these changes to a file so that it's more readable
+    # rewrite variables so that there is no need to modify zshrc.
+    # Can't we just add all the changes to zshrc_custom so that we avoid
+    # having to modify zshrc at all?
+    # We only need to define there CONFIG_DIR and INTERFACE
+    # since both are system specific and does not need to be modified after 1st setup
+    #
+    # Treat zsh plugins as apt packets, so that when we update we check if they are
+    # already installed and install them if needed
+
     ${PKG_INSTALL} git
     echo "    Cloning zsh-autosuggestions plugin"
     git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
@@ -242,10 +258,6 @@ else
     ${PKG_INSTALL} wget
     wget https://raw.githubusercontent.com/mortinger91/michelebira/refs/heads/master/michelebira.zsh-theme -P ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes
 
-	echo "Copying .zshrc_custom and .zsh_custom_aliases files and adding .zshrc_custom link to ~/.zshrc file"
-    set -x
-	cp .zshrc_custom $targetDir/.zshrc_custom
-	cp .zsh_custom_aliases $targetDir/.zsh_custom_aliases
     echo -e "\n# Custom .zshrc file:\nif [ -f ~/.zshrc_custom ]; then\n  . ~/.zshrc_custom\nfi" >> $targetDir/.zshrc
     set +x
 
@@ -489,66 +501,60 @@ else
 fi
 
 
-# Section 7
-echo "  7 - Perform KDE configuration:"
-echo "    Do you want to perform KDE configuration (y/n)?"
-read -r answer
-if [ "$answer" == "${answer#[Yy]}" ]; then
-	echo -e "    Skipping KDE configuration\n"
-else
-	echo "    Copying KDE configuration..."
-    # THIS IS NOT RECOMMENDED. JUST RE-DO THE CONFIGS MANUALLY,
-    # MESSING WITH THESE FILES CAN LEAD TO A BROKEN CONFIG IF KDE VERSIONS ARE NOT THE SAME.
-    #
-	# COPY THESE FOLDERS AND FILES IN ORDER TO
-	# HAVE THE SAME KDE CONFIGURATION ACROSS MULTIPLE MACHINES
-	#
-	# ~/.local/share/konsole/*
-	# ~/.local/share/kservices5/*
-	# ~/.local/share/kwin/*
-	# ~/.local/share/kxmlgui5/konsole/*
-	# ~/.local/share/kxmlgui5/dolphin/*
-	# ~/.local/share/networkmanagement/*
-	#
-	# This contains the user installed widgets, it is advised to
-	# download them again in the new system and do not copy this folder
-	# ~/.local/share/plasma/plasmoids/*
-	#
-	# ~/.cargo/*
-	# ~/.kde/*
-	# ~/.config/autostart/*
-	# ~/.config/kdedefaults/*
-	# ~/.config/xsettingsd/*
-	# ~/.config/dolphinrc
-	# ~/.config/kmcfonts
-	# ~/.config/kcminputrc
-	# ~/.config/kconf_updaterc
-	# ~/.config/kded5rc
-	# ~/.config/kdeglobals
-	# ~/.config/kdeglobalshortcutsrc
-	# ~/.config/konsolerc
-	# ~/.config/kscreenlockerrc
-	# ~/.config/ktimezonedrc
-	# ~/.config/kwinrc
-	# ~/.config/kwinrulesrc
-	# ~/.config/plasma-localerc
-	# ~/.config/plasma-org.kde.plasma.desktop-appletsrc
-	# ~/.config/powermanagementprofilesrc
-	# ~/.config/touchpadxlibinputrc
-	#
-	#
-	# WIDGETS USED:
-	#
-	# System Load Viewer
-	# Thermal Monitor
-	# Configurable button
-	#
-	# Non-KDE specific
-	# ~/.local/share/fonts/*
-	# ~/.selected_editor
-	# ~/.local/share/TelegramDesktop/*
-	# ~/Templates/*
-fi
+
+# KDE CONFIGS.
+# THIS IS NOT RECOMMENDED. JUST RE-DO THE CONFIGS MANUALLY,
+# MESSING WITH THESE FILES CAN LEAD TO A BROKEN CONFIG IF KDE VERSIONS ARE NOT THE SAME.
+#
+# COPY THESE FOLDERS AND FILES IN ORDER TO
+# HAVE THE SAME KDE CONFIGURATION ACROSS MULTIPLE MACHINES
+#
+# ~/.local/share/konsole/*
+# ~/.local/share/kservices5/*
+# ~/.local/share/kwin/*
+# ~/.local/share/kxmlgui5/konsole/*
+# ~/.local/share/kxmlgui5/dolphin/*
+# ~/.local/share/networkmanagement/*
+#
+# This contains the user installed widgets, it is advised to
+# download them again in the new system and do not copy this folder
+# ~/.local/share/plasma/plasmoids/*
+#
+# ~/.cargo/*
+# ~/.kde/*
+# ~/.config/autostart/*
+# ~/.config/kdedefaults/*
+# ~/.config/xsettingsd/*
+# ~/.config/dolphinrc
+# ~/.config/kmcfonts
+# ~/.config/kcminputrc
+# ~/.config/kconf_updaterc
+# ~/.config/kded5rc
+# ~/.config/kdeglobals
+# ~/.config/kdeglobalshortcutsrc
+# ~/.config/konsolerc
+# ~/.config/kscreenlockerrc
+# ~/.config/ktimezonedrc
+# ~/.config/kwinrc
+# ~/.config/kwinrulesrc
+# ~/.config/plasma-localerc
+# ~/.config/plasma-org.kde.plasma.desktop-appletsrc
+# ~/.config/powermanagementprofilesrc
+# ~/.config/touchpadxlibinputrc
+#
+#
+# WIDGETS USED:
+#
+# System Load Viewer
+# Thermal Monitor
+# Configurable button
+#
+# Non-KDE specific
+# ~/.local/share/fonts/*
+# ~/.selected_editor
+# ~/.local/share/TelegramDesktop/*
+# ~/Templates/*
+
 
 
 echo "New Linux installation setup completed, rebooting is recommended"
