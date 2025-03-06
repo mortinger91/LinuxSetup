@@ -20,7 +20,6 @@ function print_color() {
   echo -e "\033[${color_code}m${text}\033[0m"
 }
 
-# Update a file
 function file_update() {
   local fileSource="$1"
   local fileDest="/$1"
@@ -52,7 +51,7 @@ function file_update() {
   fi
 }
 
-# All the files that I want to update
+# List of the files that are going to be updated
 files=(
   "home/my_user/.zshrc_custom"
   "home/my_user/.zshrc_custom_aliases"
@@ -60,8 +59,13 @@ files=(
   "home/my_user/.config/bat/config"
 )
 
+# Update all the files
 for file in "${files[@]}"; do
   file_update "$file"
 done
 
 print_color white "Config was updated!"
+
+# Check and update (if necessary) all the dependencies
+# ./install_deps.sh
+# print_color white "Deps were updated!"

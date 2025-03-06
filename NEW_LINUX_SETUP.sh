@@ -25,6 +25,7 @@ if [ "$answer" == "${answer#[Yy]}" ]; then
 fi
 
 
+
 # Section 0
 echo "  0 - initial setup:"
 
@@ -87,6 +88,7 @@ else
 	echo "Open a new shell, relaunch the script and skip sudo configuration"
 	exit
 fi
+
 
 
 # Section 2
@@ -201,6 +203,7 @@ gesture swipe right 4 ydotool key 29:1 20:1 20:0 29:0
 fi
 
 
+
 # Section 3
 echo "  3a - Installing oh my zsh:"
 echo "    Do you want to install oh my zsh (y/n)?"
@@ -212,11 +215,11 @@ else
     sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
-echo "  3b - Configuring .zshrc and aliases:"
-echo "    Do you want to configure .zshrc and aliases (y/n)?"
+echo "  3b - Performinig .zshrc one time configuration:"
+echo "    Do you want to perform .zshrc one time configuration (y/n)?"
 read -r answer
 if [ "$answer" == "${answer#[Yy]}" ]; then
-	echo -e "    Skipping .zshrc and aliases configuration\n"
+	echo -e "    Skipping .zshrc configuration\n"
 else
     echo "    Do you want to perform a dry-run (y/n)?"
     read -r answer
@@ -230,222 +233,27 @@ else
         touch "$targetDir/.zshrc"
     fi
 
-    echo "Copying .zshrc_custom and .zsh_custom_aliases files"
+    # Not needed, just run update-config.sh
+    # echo "Copying .zshrc_custom and .zsh_custom_aliases files"
+	# cp .zshrc_custom $targetDir/.zshrc_custom
+	# cp .zsh_custom_aliases $targetDir/.zsh_custom_aliases
+
     set -x
-	cp .zshrc_custom $targetDir/.zshrc_custom
-	cp .zsh_custom_aliases $targetDir/.zsh_custom_aliases
-
-    # TODO: Integrate this part into update-config
-
-    # Possibly add these changes to a file so that it's more readable
-    # rewrite variables so that there is no need to modify zshrc.
-    # Can't we just add all the changes to zshrc_custom so that we avoid
-    # having to modify zshrc at all?
-    # We only need to define there CONFIG_DIR and INTERFACE
-    # since both are system specific and does not need to be modified after 1st setup
-    #
-    # Treat zsh plugins as apt packets, so that when we update we check if they are
-    # already installed and install them if needed
-
-    ${PKG_INSTALL} git
-    echo "    Cloning zsh-autosuggestions plugin"
-    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-
-    echo "    Cloning zsh-syntax-highlighting plugin"
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-
-    echo "    Cloning the best theme ever (michelebira)"
-    ${PKG_INSTALL} wget
-    wget https://raw.githubusercontent.com/mortinger91/michelebira/refs/heads/master/michelebira.zsh-theme -P ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes
-
+    # Add .zshrc_custom link to .zshrc file
     echo -e "\n# Custom .zshrc file:\nif [ -f ~/.zshrc_custom ]; then\n  . ~/.zshrc_custom\nfi" >> $targetDir/.zshrc
     set +x
 
-    echo "Before: $(grep "^plugins=(" ~/.zshrc)"
-    sed -i '/^plugins=(/c\plugins=(git zsh-autosuggestions zsh-syntax-highlighting)' ~/.zshrc
-    echo "After: $(grep "^plugins=" ~/.zshrc)"
+    # Commenting out source since it's added in .zshrc_custom
+    sed -i '/^source $ZSH/oh-my-zsh.sh/c\# source $ZSH/oh-my-zsh.sh)' ~/.zshrc
 
-    echo "Remember to set: ZSH_THEME=\"michelebira\", HYPHEN_INSENSITIVE=\"true\" and COMPLETION_WAITING_DOTS=\"true\" (or don't!)"
+    # Not needed anymore
+    # echo "Before: $(grep "^plugins=(" ~/.zshrc)"
+    # sed -i '/^plugins=(/c\plugins=(git zsh-autosuggestions zsh-syntax-highlighting)' ~/.zshrc
+    # echo "After: $(grep "^plugins=" ~/.zshrc)"
+
+    # echo "Remember to set: ZSH_THEME=\"michelebira\", HYPHEN_INSENSITIVE=\"true\" and COMPLETION_WAITING_DOTS=\"true\" (or don't!)"
 fi
 
-
-# Section 4
-echo "  4 - Installing useful packages:"
-echo "    Do you want to install useful packages (y/n)?"
-read -r answer
-if [ "$answer" == "${answer#[Yy]}" ]; then
-	echo -e "    Skipping useful packages installation\n"
-else
-	if [ "$DISTRO" == "Debian" ]; then
-		${PKG_UPDATE}
-
-		# Debian packages
-		${PKG_INSTALL} apt-transport-https
-		${PKG_INSTALL} apt-utils
-		${PKG_INSTALL} autoconf
-		${PKG_INSTALL} bash-completion
-		${PKG_INSTALL} bat
-		${PKG_INSTALL} bear
-		${PKG_INSTALL} bpfcc-tools
-		${PKG_INSTALL} bpftrace
-		${PKG_INSTALL} build-tools
-		${PKG_INSTALL} ca-certificates
-		${PKG_INSTALL} ccache
-		${PKG_INSTALL} clang
-		${PKG_INSTALL} clangd
-		${PKG_INSTALL} clang-format
-		${PKG_INSTALL} cmake
-		${PKG_INSTALL} curl
-		${PKG_INSTALL} dnsutils
-		${PKG_INSTALL} firmware-iwlwifi
-		${PKG_INSTALL} fonts-firacode
-		${PKG_INSTALL} g++
-		${PKG_INSTALL} gcc
-		${PKG_INSTALL} gdb
-		${PKG_INSTALL} git
-		${PKG_INSTALL} git-gui
-		${PKG_INSTALL} git-lfs
-		${PKG_INSTALL} gitk
-		${PKG_INSTALL} gnome-keyring
-		${PKG_INSTALL} gnupg
-		${PKG_INSTALL} gparted
-		${PKG_INSTALL} gzip
-		${PKG_INSTALL} htop
-		${PKG_INSTALL} locales-all
-		${PKG_INSTALL} locate
-		${PKG_INSTALL} libevdev-dev
-		${PKG_INSTALL} libudev-dev
-		${PKG_INSTALL} libconfig++-dev
-		${PKG_INSTALL} libreoffice
-		# OpenGL development
-		${PKG_INSTALL} libgl1-mesa-dev
-		${PKG_INSTALL} libxcursor-dev
-		${PKG_INSTALL} libxi-dev
-		${PKG_INSTALL} libxinerama-dev
-		${PKG_INSTALL} libxrandr-dev
-		${PKG_INSTALL} libxss-dev
-		# End of OpenGL development
-		${PKG_INSTALL} lsb-release
-		${PKG_INSTALL} lldb
-		${PKG_INSTALL} llvm
-		${PKG_INSTALL} lm-sensors
-		${PKG_INSTALL} nmap
-		${PKG_INSTALL} net-tools
-		${PKG_INSTALL} network-manager-openvpn
-		${PKG_INSTALL} nginx
-		${PKG_INSTALL} make
-		${PKG_INSTALL} openssl
-		${PKG_INSTALL} python3
-		${PKG_INSTALL} python3-venv
-		${PKG_INSTALL} ripgrep
-		${PKG_INSTALL} tcpdump
-		${PKG_INSTALL} ssh
-		${PKG_INSTALL} sshfs
-		${PKG_INSTALL} ssl-cert
-		${PKG_INSTALL} telegram-desktop
-		${PKG_INSTALL} trash-cli
-		${PKG_INSTALL} tmux
-		${PKG_INSTALL} unzip
-		${PKG_INSTALL} wget
-		${PKG_INSTALL} whereis
-		${PKG_INSTALL} xclip
-
-
-
-        echo "    Do you want to install and configure Xozide (y/n)?"
-		read -r answer
-		if [ "$answer" == "${answer#[Yy]}" ]; then
-			echo "Skipping Xozide"
-		else
-            curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
-
-            mkdir -p ~/.config/bat
-            echo -e "--map-syntax '.zshrc*:Bourne Again Shell (bash)'" \
-            > ~/.config/bat/config
-        fi
-
-		echo "    Do you want to install Visual Studio Code (y/n)?"
-		read -r answer
-		if [ "$answer" == "${answer#[Yy]}" ]; then
-			echo "Skipping VSCode"
-		else
-			mkdir ~/temp
-			cd ~/temp || exit
-
-			# Visual Studio Code installation
-			wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
-			sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
-			sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
-			rm -f packages.microsoft.gpg
-			${PKG_UPDATE}
-			${PKG_INSTALL} code
-		fi
-
-		echo "    Do you want to install Google Chrome (y/n)?"
-		read -r answer
-		if [ "$answer" == "${answer#[Yy]}" ]; then
-			echo "Skipping Google Chrome"
-		else
-			mkdir ~/temp
-			cd ~/temp || exit
-
-			# Google Chrome installation
-			wget https://dl.google.com/linux/direct/google-chrome-stable_current_${ARCH}.deb
-			sudo dpkg -i google-chrome-stable_current_${ARCH}.deb
-		fi
-
-		echo "    Do you want to install Wireshark (y/n)?"
-		read -r answer
-		if [ "$answer" == "${answer#[Yy]}" ]; then
-			echo "Skipping Wireshark"
-		else
-			${PKG_INSTALL} wireshark
-			sudo usermod -a -G wireshark "${userName}"
-		fi
-
-		echo "    Do you want to install Rust Toolchain (y/n)?"
-		read -r answer
-		if [ "$answer" == "${answer#[Yy]}" ]; then
-			echo "Skipping Rust Toolchain"
-		else
-			curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-		fi
-
-		echo "    Do you want to install Docker (y/n)?"
-		read -r answer
-		if [ "$answer" == "${answer#[Yy]}" ]; then
-			echo "Skipping Docker"
-		else
-			sudo mkdir -m 0755 -p /etc/apt/keyrings
-			curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-			echo "deb [arch=${ARCH} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-			${PKG_UPDATE}
-			# If update throws an error try this command:
-			# sudo chmod a+r /etc/apt/keyrings/docker.gpg
-			${PKG_INSTALL} docker docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-			sudo groupadd docker
-			sudo usermod -aG docker "${userName}"
-			echo "Testing docker installation, reboot to test without sudo"
-			sudo docker run hello-world
-		fi
-
-        echo "    Do you want to install fzf (y/n)?"
-		read -r answer
-		if [ "$answer" == "${answer#[Yy]}" ]; then
-			echo "Skipping fzf"
-		else
-            # Used for fzf and other user installed binaries
-            mkdir -p /home/${userName}/.local/bin
-
-            echo -e "Download fzf from the Github official page:\nhttps://github.com/junegunn/fzf/releases\nBe careful to choose the right architecture: ${ARCH}.\nThen copy the fzf binary to /home/${userName}/.local/bin"
-        fi
-	else
-		# Manjaro packages
-		${PKG_INSTALL} git
-		${PKG_INSTALL} dnsutils
-	fi
-
-fi
 
 
 # Section 5
@@ -487,6 +295,7 @@ else
 	# Configuring git lfs
 	git lfs install --system
 fi
+
 
 
 # Section 6
@@ -565,6 +374,8 @@ if [ "$answer" == "${answer#[Yy]}" ]; then
 else
 	sudo reboot now
 fi
+
+
 
 # ON BOOT SCRIPTS:
 # Add scripts from BootScripts repository (if necessary).
