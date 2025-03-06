@@ -23,8 +23,8 @@ function print_color() {
 # Update a file
 function file_update() {
   local fileSource="$1"
-  # Substitute the string "my_user" with the actual user
   local fileDest="/$1"
+  # Substitute the string "my_user" with the actual user
   fileDest="${fileDest//my_user/$(whoami)}"
 
   git diff $fileDest $fileSource >/dev/null 2>&1
@@ -42,7 +42,12 @@ function file_update() {
     if [ "$answer" == "${answer#[Yy]}" ]; then
       print_color red "Not updating $(basename "$fileDest")"
     else
+      # Save the original owner of the file
+      local owner=$(stat -c "%U:%G" $fileDest)
       sudo cp -i -p $fileSource $fileDest
+      # Restore the original owner of the file.
+      # Git does not maintain the original owner when you commit a file
+      sudo chown $owner $fileDest
     fi
   fi
 }
