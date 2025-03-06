@@ -35,7 +35,7 @@ else
     alias rm='rm -i'  # fallback to interactive remove
 fi
 
-alias mkdir='mkdir -p' #-p create more than one directory if needed
+alias mkdir='mkdir -p' #-p create all the nested directories
 
 alias ps='ps auxf' #-a shows all users' processes, -u user-oriented output, -x includes processes without TTY, -f shows process hierarchy (forest)
 

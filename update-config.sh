@@ -39,7 +39,7 @@ function file_update() {
         if [ "$answer" == "${answer#[Yy]}" ]; then
             print_color red "Not updating $file"
         else
-            mv -i $file ~/$file
+            cp -i $file ~/$file
         fi
     fi
 }
