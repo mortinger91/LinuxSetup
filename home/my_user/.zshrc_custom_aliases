@@ -26,6 +26,8 @@ function update_config() {
   NEW_COMMITS=$((AFTER_PULL - BEFORE_PULL))
   if [ $NEW_COMMITS -gt 0 ]; then
     echo "Pulled $NEW_COMMITS new commits"
+  else
+    echo "No new changes were pulled"
   fi
   # The script is run even when no updates were fetched from remote
   # because the local configuration could have changed
