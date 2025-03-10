@@ -24,6 +24,9 @@ function update_config() {
   fi
   ./update-config.sh
   cd $CURRENT_DIR
+  # Sourcing otherwise the new aliases and changes
+  # won't be available in the current terminal
+  source ~/.zshrc
 }
 alias update-config='update_config'
 

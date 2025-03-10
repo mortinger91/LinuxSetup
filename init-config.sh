@@ -12,3 +12,5 @@ dirname ${BASH_SOURCE[0]} # save this to CONFIG_DIR
 # source $ZSH/oh-my-zsh.sh
 #
 # comment this from zshrc using sed, add comment that explains that it's moved to zshrc_custom
+
+# close the terminal or source after running init
