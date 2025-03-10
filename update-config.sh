@@ -21,16 +21,16 @@ function file_update() {
   local fileSource="$1"
   local fileDest="/$1"
   # Substitute the string "my_user" with the actual user
-  fileDest="${fileDest//my_user/$(whoami)}"
+  fileDest="${fileDest//my_user/$USERNAME}"
 
   # Create the destination file and the path if they do not not exist
   if [ ! -f "$fileDest" ]; then
     print_color red "The file $fileDest does not exist"
 
-    # Get the owner of the closest existing folder to the file
     filePath="$(dirname "$fileDest")"
-    existingPath="$filePath"
 
+    # Get the owner of the closest existing folder to the file
+    existingPath="$filePath"
     while [ ! -d "$existingPath" ] && [ "$existingPath" != "/" ]; do
       existingPath="$(dirname "$existingPath")"
       if [ -d "$existingPath" ]; then
@@ -38,10 +38,17 @@ function file_update() {
       fi
     done
 
-    mkdir -p "$filePath"
-    touch "$fileDest"
-    local folderOwner=$(stat -c "%U:%G" "$existingPath")
-    sudo chown $folderOwner "$fileDest"
+    local folderOwnerAndGroup=$(stat -c "%U:%G" "$existingPath")
+    local folderOwner=$(stat -c "%U" "$existingPath")
+
+    if [ "$folderOwner" = "root" ]; then
+      sudo mkdir -p "$filePath"
+    else
+      mkdir -p "$filePath"
+    fi
+
+    sudo touch "$fileDest"
+    sudo chown $folderOwnerAndGroup "$fileDest"
     sudo chmod 644 "$fileDest"
     print_color green "Created new file at $fileDest with owner $folderOwner"
   fi
@@ -80,6 +87,8 @@ files=(
   "etc/bluetooth/main.conf"
   "home/my_user/.config/bat/config"
 )
+
+USERNAME=$(whoami)
 
 # In order for this to work, the script needs to be called with
 # the absolute path.
