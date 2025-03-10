@@ -11,12 +11,12 @@ function update_config() {
     echo "This command should not run as root"
     return
   fi
-  git switch master >/dev/null 2>&1
+  git -C $CONFIG_DIR switch master >/dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo "git switch failed, master branch not found"
     return
   fi
-  git pull >/dev/null 2>&1
+  git -C $CONFIG_DIR pull >/dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo "git pull failed, you have local changes in your working directory"
     return
