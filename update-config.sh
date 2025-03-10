@@ -69,5 +69,5 @@ done
 print_color white "Config was updated!"
 
 # Check and update (if necessary) all the dependencies
-# ./install-deps.sh
+# ./install-deps.sh update
 # print_color white "Deps were updated!"

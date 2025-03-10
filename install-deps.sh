@@ -165,10 +165,32 @@ Signed-By: /etc/apt/keyrings/docker.gpg" \
   sudo mv -i ~/dev/fzf/bin/fzf /home/${USERNAME}/.local/bin
 }
 
+function initInstall() {
+  echo "Running install script in init mode"
+  installAptPackages
+  installManualPackages
+}
+
+function updateInstall() {
+  echo "Running install script in update mode"
+
+}
+
+function manualInstall() {
+  echo "Running install script in manual mode"
+
+}
+
 PKG_UPDATE="sudo apt-get update"
 PKG_INSTALL="sudo apt-get install -y"
 USERNAME=$(whoami)
 ARCH=$(dpkg --print-architecture)
 
-installAptPackages
-installManualPackages
+case "$1" in
+  init)
+    initInstall ;;
+  update)
+    updateInstall ;;
+  *)
+    manualInstall ;;
+esac
