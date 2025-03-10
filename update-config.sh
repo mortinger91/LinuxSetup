@@ -25,6 +25,7 @@ function file_update() {
 
   # Create the destination file and the path if they do not not exist
   if [ ! -f "$fileDest" ]; then
+    print_color red "The file $fileDest does not exist"
 
     # Get the owner of the closest existing folder to the file
     filePath="$(dirname "$fileDest")"
