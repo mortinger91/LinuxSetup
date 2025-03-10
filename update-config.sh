@@ -51,6 +51,7 @@ function file_update() {
     sudo chown $folderOwnerAndGroup "$fileDest"
     # Setting restricting permissions on new files
     sudo chmod 644 "$fileDest"
+
     print_color green "Created new file $fileDest with owner $folderOwner"
   fi
 
@@ -82,26 +83,18 @@ function file_update() {
   fi
 }
 
-# List of the files that are going to be updated
-# Could an be improved by moving all the files that needs to be synced
-# to a sync folder, then use `find` to get all the files.
-files=(
-  "home/my_user/.zshrc_custom"
-  "home/my_user/.zshrc_custom_aliases"
-  "home/my_user/.config/bat/config"
-  "etc/bluetooth/main.conf"
-  "etc/sysctl.d/99-increase-limit.conf"
-)
-
 USERNAME=$(whoami)
 
 # In order for this to work, the script needs to be called with
 # the absolute path.
 cd $(dirname "${BASH_SOURCE[0]}")
 
+# Get all files in the sync folder
+mapfile -t files < <(find sync -type f)
+
 # Update all the files
 for file in "${files[@]}"; do
-  file_update "$file"
+  file_update "${file#sync/}"
 done
 
 print_color white "Config was updated!"
