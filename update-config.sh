@@ -52,6 +52,8 @@ function file_update() {
 }
 
 # List of the files that are going to be updated
+# Could an be improved by moving all the files that needs to be synced
+# to a sync folder, then use `find` to get all the files.
 files=(
   "home/my_user/.zshrc_custom"
   "home/my_user/.zshrc_custom_aliases"
@@ -67,5 +69,5 @@ done
 print_color white "Config was updated!"
 
 # Check and update (if necessary) all the dependencies
-# ./install_deps.sh
+# ./install-deps.sh
 # print_color white "Deps were updated!"

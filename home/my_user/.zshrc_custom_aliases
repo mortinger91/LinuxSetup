@@ -47,7 +47,7 @@ alias ..='cd ..'
 
 alias xclip='xclip -selection clipboard'
 
-alias up='sudo apt update && sudo apt full-upgrade -y'
+alias up='sudo apt update && sudo apt full-upgrade -y && sudo fwupdtool update'
 
 # INTERFACE is defined in .zshrc
 function whatsmyip() {
