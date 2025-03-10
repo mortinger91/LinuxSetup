@@ -23,7 +23,12 @@ function update_config() {
     return
   fi
   AFTER_PULL=$(git -C $CONFIG_DIR rev-list --count HEAD)
-  echo "Pulled $((AFTER_PULL - BEFORE_PULL)) new commits"
+  NEW_COMMITS=$((AFTER_PULL - BEFORE_PULL))
+  if [ $NEW_COMMITS -gt 0 ]; then
+    echo "Pulled $NEW_COMMITS new commits"
+  fi
+  # The script is run even when no updates were fetched from remote
+  # because the local configuration could have changed
   $CONFIG_DIR/update-config.sh
   # Sourcing .zshrc otherwise the new aliases and changes
   # won't be available in the current terminal after the script has ended.
