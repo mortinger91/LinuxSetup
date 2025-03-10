@@ -1,36 +1,37 @@
 ### My zsh common aliases ###
 
-# This function needs to pull the latest changes from git
-# before the update-config.sh script runs,
-# so that it can pull also the script changes
+# This function pulls the latest changes from git
+# before the `update-config.sh` script runs.
+# This is needed in order to run the latest version of the script.
+#
+# This function is the update entry point, the script is expected to be modified
+# while this function is not.
 function update_config() {
   if [ "$(whoami)" = "root" ]; then
-    echo "This command should not be run as root"
-    return 1
+    echo "This command should not run as root"
+    return
   fi
-  # Save the current dir
-  CURRENT_DIR=$(pwd)
-  # Moving to the git root folder
-  # CONFIG_DIR is defined in .zshrc
-  cd $CONFIG_DIR
-  # Pulling the latest changes
   git switch master >/dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo "git switch failed, master branch not found"
+    return
   fi
   git pull >/dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo "git pull failed, you have local changes in your working directory"
+    return
   fi
-  ./update-config.sh
-  cd $CURRENT_DIR
-  # Sourcing otherwise the new aliases and changes
-  # won't be available in the current terminal
+  $CONFIG_DIR/update-config.sh
+  # Sourcing .zshrc otherwise the new aliases and changes
+  # won't be available in the current terminal after the script has ended.
+  #
+  # The sourcing needs to happen here because the script is running in a subprocess.
   source ~/.zshrc
 }
 alias update-config='update_config'
 
-alias ls='ls -lahF --color=always' #-a shows all file, -l long list format, -h human-readable, -F add symbols like / for dirs, --color forces colored output
+#-a shows all file, -l long list format, -h human-readable, -F add symbols like / for dirs, --color forces colored output
+alias ls='ls -lahF --color=always'
 
 alias cp='cp -i'
 
@@ -45,12 +46,14 @@ alias grep='rg'
 if command -v trash >/dev/null 2>&1; then
   alias rm='trash -v'
 else
-  alias rm='rm -i'  # fallback to interactive remove
+  alias rm='rm -i'
 fi
 
-alias mkdir='mkdir -p' #-p create all the nested directories
+#-p create all the nested directories
+alias mkdir='mkdir -p'
 
-alias ps='ps auxf' #-a shows all users' processes, -u user-oriented output, -x includes processes without TTY, -f shows process hierarchy (forest)
+#-a shows all users' processes, -u user-oriented output, -x includes processes without TTY, -f shows process hierarchy (forest)
+alias ps='ps auxf'
 
 alias ..='cd ..'
 
@@ -58,7 +61,7 @@ alias xclip='xclip -selection clipboard'
 
 alias up='sudo apt update && sudo apt full-upgrade -y && sudo fwupdtool update'
 
-# INTERFACE is defined in .zshrc
+# INTERFACE is defined in ~/.zshrc
 function whatsmyip() {
   # Internal IP Lookup.
   if command -v ip >/dev/null 2>&1; then
@@ -71,7 +74,6 @@ function whatsmyip() {
 
   # External IP Lookup
   echo -n "External IP: "
-  # curl -s ifconfig.me
   curl -s ipecho.net/plain
   echo
 }

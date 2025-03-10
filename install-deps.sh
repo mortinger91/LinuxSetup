@@ -194,5 +194,3 @@ case "$1" in
   *)
     manualInstall ;;
 esac
-
-#changeFromRepo

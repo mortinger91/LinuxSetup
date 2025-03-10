@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Assume we are running this script after the `update_config()`
-# bash function has pulled the latest changes from the git remote.
-
 function print_color() {
   local color=$1
   local text=$2
@@ -60,6 +57,10 @@ files=(
   "etc/bluetooth/main.conf"
   "home/my_user/.config/bat/config"
 )
+
+# In order for this to work, the script needs to be called with
+# the absolute path.
+cd $(dirname "${BASH_SOURCE[0]}")
 
 # Update all the files
 for file in "${files[@]}"; do
