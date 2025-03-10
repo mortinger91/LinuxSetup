@@ -6,7 +6,7 @@ function print_color() {
 
   case "$color" in
     red)     color_code="1;31" ;;
-    green)   color_code="0;32" ;;
+    green)   color_code="1;32" ;;
     yellow)  color_code="1;33" ;;
     blue)    color_code="0;34" ;;
     purple)  color_code="0;35" ;;
@@ -22,6 +22,28 @@ function file_update() {
   local fileDest="/$1"
   # Substitute the string "my_user" with the actual user
   fileDest="${fileDest//my_user/$(whoami)}"
+
+  # Create the destination file and the path if they do not not exist
+  if [ ! -f "$fileDest" ]; then
+
+    # Get the owner of the closest existing folder to the file
+    filePath="$(dirname "$fileDest")"
+    existingPath="$filePath"
+
+    while [ ! -d "$existingPath" ] && [ "$existingPath" != "/" ]; do
+      existingPath="$(dirname "$existingPath")"
+      if [ -d "$existingPath" ]; then
+        break
+      fi
+    done
+
+    mkdir -p "$filePath"
+    touch "$fileDest"
+    local folderOwner=$(stat -c "%U:%G" "$existingPath")
+    sudo chown $folderOwner "$fileDest"
+    sudo chmod 644 "$fileDest"
+    print_color green "Created new file at $fileDest with owner $folderOwner"
+  fi
 
   git diff $fileDest $fileSource >/dev/null 2>&1
   diff_found=$?
