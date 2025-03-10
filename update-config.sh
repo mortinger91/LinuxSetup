@@ -49,6 +49,7 @@ function file_update() {
 
     sudo touch "$fileDest"
     sudo chown $folderOwnerAndGroup "$fileDest"
+    # Setting restricting permissions on new files
     sudo chmod 644 "$fileDest"
     print_color green "Created new file $fileDest with owner $folderOwner"
   fi
@@ -70,10 +71,13 @@ function file_update() {
     else
       # Save the original owner of the file
       local owner=$(stat -c "%U:%G" $fileDest)
+      local ownerPermissions=$(stat -c "%a" $fileDest)
       sudo cp -i -p $fileSource $fileDest
       # Restore the original owner of the file.
       # Git does not maintain the original owner when you commit a file
       sudo chown $owner $fileDest
+      # Restore also original permission
+      sudo chmod $ownerPermissions "$fileDest"
     fi
   fi
 }
