@@ -15,7 +15,13 @@ function update_config() {
   cd $CONFIG_DIR
   # Pulling the latest changes
   git switch master >/dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo "git switch failed, master branch not found"
+  fi
   git pull >/dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    echo "git pull failed, you have local changes in your working directory"
+  fi
   ./update-config.sh
   cd $CURRENT_DIR
 }
