@@ -19,6 +19,7 @@ function print_color() {
 
 function file_update() {
   local fileSource="$1"
+  # Remove the sync folder from the destination file path
   local fileDest="/${fileSource#sync/}"
   # Substitute the string "my_user" with the actual user
   fileDest="${fileDest//my_user/$USERNAME}"
