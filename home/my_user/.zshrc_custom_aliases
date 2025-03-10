@@ -16,11 +16,14 @@ function update_config() {
     echo "git switch failed, master branch not found"
     return
   fi
+  BEFORE_PULL=$(git -C $CONFIG_DIR rev-list --count HEAD)
   git -C $CONFIG_DIR pull >/dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo "git pull failed, you have local changes in your working directory"
     return
   fi
+  AFTER_PULL=$(git -C $CONFIG_DIR rev-list --count HEAD)
+  echo "Pulled $((AFTER_PULL - BEFORE_PULL)) new commits"
   $CONFIG_DIR/update-config.sh
   # Sourcing .zshrc otherwise the new aliases and changes
   # won't be available in the current terminal after the script has ended.
