@@ -40,8 +40,6 @@ if [ -f ~/.zshrc_custom_local ]; then
   . ~/.zshrc_custom_local
 fi
 
-source $ZSH/oh-my-zsh.sh
-
 # My zsh common aliases:
 if [ -f ~/.zshrc_custom_aliases ]; then
   . ~/.zshrc_custom_aliases
