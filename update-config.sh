@@ -50,7 +50,7 @@ function file_update() {
     sudo touch "$fileDest"
     sudo chown $folderOwnerAndGroup "$fileDest"
     sudo chmod 644 "$fileDest"
-    print_color green "Created new file at $fileDest with owner $folderOwner"
+    print_color green "Created new file $fileDest with owner $folderOwner"
   fi
 
   git diff $fileDest $fileSource >/dev/null 2>&1
@@ -84,8 +84,9 @@ function file_update() {
 files=(
   "home/my_user/.zshrc_custom"
   "home/my_user/.zshrc_custom_aliases"
-  "etc/bluetooth/main.conf"
   "home/my_user/.config/bat/config"
+  "etc/bluetooth/main.conf"
+  "etc/sysctl.d/99-increase-limit.conf"
 )
 
 USERNAME=$(whoami)
