@@ -19,7 +19,7 @@ function print_color() {
 
 function file_update() {
   local fileSource="$1"
-  local fileDest="/$1"
+  local fileDest="/${fileSource#sync/}"
   # Substitute the string "my_user" with the actual user
   fileDest="${fileDest//my_user/$USERNAME}"
 
@@ -94,7 +94,7 @@ mapfile -t files < <(find sync -type f)
 
 # Update all the files
 for file in "${files[@]}"; do
-  file_update "${file#sync/}"
+  file_update "$file"
 done
 
 print_color white "Config was updated!"
