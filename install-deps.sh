@@ -37,6 +37,7 @@ aptEssentialPackages=(
   "curl"
   "dnsutils"
   "fonts-firacode"
+  "fwupdtool"
   "g++"
   "gcc"
   "gdb"
@@ -75,6 +76,8 @@ aptEssentialPackages=(
   "wget"
   "whereis"
   "xclip"
+  "zsh-autosuggestions"
+  "zsh-syntax-highlighting"
 )
 
 openGLDevelopmentPackages=(
@@ -96,13 +99,13 @@ aptOptionalPackages=(
   "tcpdump"
 )
 
+function checkEssentialPackages() {
+  # Check that every essential package is installed from the aptEssentialPackages array
+
+  # Post packages install
+}
+
 function installManualPackages() {
-  echo "Cloning zsh-autosuggestions plugin"
-  git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
-
-  echo "Cloning zsh-syntax-highlighting plugin"
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-
   echo "Cloning the best theme ever (michelebira)"
   ${PKG_INSTALL} wget
   curl -fsSL https://raw.githubusercontent.com/mortinger91/michelebira/refs/heads/master/michelebira.zsh-theme -P ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes
@@ -173,7 +176,7 @@ function initInstall() {
 
 function updateInstall() {
   echo "Running install script in update mode"
-
+  checkEssentialPackages
 }
 
 function manualInstall() {
