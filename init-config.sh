@@ -19,25 +19,28 @@ function init_config() {
     exit 1
   fi
 
-  # Checking if Xorg or Wayland is in use
-  if [ "$XDG_SESSION_TYPE" == "wayland" ]; then
-    echo "You are running Wayland, as expected!"
-  else
+  # Checking if Xorg is in use.
+  # If this is run from ssh it will return tty, ignore it
+  if [ "$XDG_SESSION_TYPE" == "xorg" ]; then
     print_color yellow "WARNING: you running Xorg, consider switching to Wayland"
   fi
 
   echo "Detected architecture: $(dpkg --print-architecture)"
 
   # Check if secure boot is enabled
-  if mokutil --sb-state | grep -q "SecureBoot enabled"; then
-    echo "Secure Boot is enabled, as expected!"
+  if ! command -v mokutil >/dev/null 2>&1; then
+    print_color yellow "Could not check if secure boot is enabled or not"
   else
-    print_color red "WARNING: Secure Boot is disabled"
+    if mokutil --sb-state | grep -q "SecureBoot enabled"; then
+      echo "Secure Boot is enabled, as expected!"
+    else
+      print_color red "WARNING: Secure Boot is disabled"
+    fi
   fi
 
   # Check if hard drive is encrypted
   if lsblk -nf | grep -qi "luk"; then
-    echo "Hard drive seems to be encrypted, as expected!"
+    echo "Hard drive is encrypted, as expected!"
   else
     print_color red "WARNING: Hard drive seems to not be encrypted"
   fi
