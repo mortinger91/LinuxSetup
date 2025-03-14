@@ -287,7 +287,8 @@ PKG_INSTALL="sudo apt-get install -y"
 
 init_config
 init_touchpad_gestures
-init_zsh
+init_install_ohmyzsh
+init_configure_zsh
 init_git
 init_grub
 
