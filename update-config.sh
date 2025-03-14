@@ -1,22 +1,5 @@
 #!/bin/bash
 
-function print_color() {
-  local color=$1
-  local text=$2
-
-  case "$color" in
-    red)     color_code="1;31" ;;
-    green)   color_code="1;32" ;;
-    yellow)  color_code="1;33" ;;
-    blue)    color_code="0;34" ;;
-    purple)  color_code="0;35" ;;
-    cyan)    color_code="0;36" ;;
-    white)   color_code="1;37" ;;
-    *)       color_code="0;37" ;;
-  esac
-  echo -e "\033[${color_code}m${text}\033[0m"
-}
-
 function file_update() {
   local fileSource="$1"
   # Remove the sync folder from the destination file path
@@ -89,6 +72,8 @@ USERNAME=$(whoami)
 # In order for this to work, the script needs to be called with
 # the absolute path.
 cd $(dirname "${BASH_SOURCE[0]}")
+
+source print-color.sh
 
 # Get all files in the sync folder
 mapfile -t files < <(find sync -type f)
