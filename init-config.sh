@@ -169,11 +169,11 @@ gesture swipe right 4 ydotool key 29:1 20:1 20:0 29:0
   #   sudo libinput-gestures-setup install
 }
 
-function init_zsh() {
-  echo "Do you want to configure zsh (y/n)?"
+function init_install_ohmyzsh() {
+  echo "Do you want to install oh my zsh (y/n)?"
   read -r answer
   if [ "$answer" == "${answer#[Yy]}" ]; then
-    print_color yellow "Skipping zsh configuration"
+    print_color yellow "Skipping oh my zsh installation"
     return
   fi
 
@@ -183,6 +183,16 @@ function init_zsh() {
   set -e
   sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
   set +e
+  # The script will exit here
+}
+
+function init_configure_zsh() {
+  echo "Do you want to configure zsh (y/n)?"
+  read -r answer
+  if [ "$answer" == "${answer#[Yy]}" ]; then
+    print_color yellow "Skipping zsh configuration"
+    return
+  fi
 
   # Add .zshrc_custom link to .zshrc file
   CONFIG_DIR=$SCRIPT_PATH
