@@ -179,7 +179,10 @@ function init_zsh() {
 
   ${PKG_UPDATE}
   ${PKG_INSTALL} zsh
+  ${PKG_INSTALL} curl
+  set -e
   sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  set +e
 
   # Add .zshrc_custom link to .zshrc file
   CONFIG_DIR=$SCRIPT_PATH
