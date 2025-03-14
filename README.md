@@ -9,7 +9,7 @@ Supports Debian-like systems.
 
 1 - choose a folder: `~/dev`  
 2 - `mkdir ~/dev`  
-3 - `git clone https://github.com/mortinger91/LinuxSetup.git ~/dev`  
+3 - `git clone https://github.com/mortinger91/LinuxSetup.git ~/dev/LinuxSetup`  
 4 - `~/dev/LinuxSetup/init-config.sh`
 
 Make sure to use the absolute path of the repo when running the `init-config.sh` script.

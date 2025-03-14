@@ -14,7 +14,7 @@ function init_config() {
   fi
 
   # Detecting distribution
-  if command -v apt >/dev/null 2>&1; then
+  if ! command -v apt >/dev/null 2>&1; then
     print_color red "Detected non Debian system, exiting the script"
     exit 1
   fi
