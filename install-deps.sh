@@ -112,8 +112,7 @@ function installManualPackages() {
   read -r answer
   if [[ "$answer" == [Yy]* ]]; then
     echo "Cloning the best theme ever (michelebira)..."
-    ${PKG_INSTALL} wget
-    curl -fsSL https://raw.githubusercontent.com/mortinger91/michelebira/refs/heads/master/michelebira.zsh-theme -P ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes
+    curl -fsSL https://raw.githubusercontent.com/mortinger91/michelebira/refs/heads/master/michelebira.zsh-theme -o ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes
   fi
 
   echo "Do you want to install Xozide? (y/n)?"
