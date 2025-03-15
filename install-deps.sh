@@ -77,7 +77,6 @@ aptEssentialPackages=(
   "xclip"
   "zsh-autosuggestions"
   "zsh-syntax-highlighting"
-  "sl"
 )
 
 openGLDevelopmentPackages=(
@@ -113,7 +112,7 @@ function installManualPackages() {
   read -r answer
   if [[ "$answer" == [Yy]* ]]; then
     echo "Cloning the best theme ever (michelebira)..."
-    curl -fsSL https://raw.githubusercontent.com/mortinger91/michelebira/refs/heads/master/michelebira.zsh-theme -o ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes
+    curl -fsSL https://raw.githubusercontent.com/mortinger91/michelebira/refs/heads/master/michelebira.zsh-theme -o ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes/michelebira.zsh-theme
   fi
 
   echo "Do you want to install Xozide? (y/n)?"
