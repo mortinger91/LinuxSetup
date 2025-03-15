@@ -101,7 +101,7 @@ aptOptionalPackages=(
 
 function installAptPackages() {
   ${PKG_UPDATE}
-  for package in "${packages[@]}"; do
+  for package in "${aptEssentialPackages[@]}"; do
     if ! dpkg-query -W -f='${Status}' ${package} 2>/dev/null | grep -q "ok installed"; then
       ${PKG_INSTALL} ${package}
     fi
