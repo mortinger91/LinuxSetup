@@ -31,11 +31,13 @@ function update_config() {
   fi
   # The script is run even when no updates were fetched from remote
   # because the local configuration could have changed
-  $CONFIG_DIR/update-config.sh
+  $CONFIG_DIR/update-config.sh deps
   # Sourcing .zshrc otherwise the new aliases and changes
   # won't be available in the current terminal after the script has ended.
   #
-  # The sourcing needs to happen here because the script is running in a subprocess.
+  # The sourcing cannot happen in the update-config script,
+  # because the script is running in a subprocess of the user terminal.
+  # This alias is running in the parent process (the same one used by the user).
   source ~/.zshrc
 }
 alias update-config='update_config'

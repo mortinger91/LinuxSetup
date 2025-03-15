@@ -67,11 +67,18 @@ function file_update() {
   fi
 }
 
+function checkDeps() {
+  $SCRIPT_PATH/install-deps.sh update
+}
+
 USERNAME=$(whoami)
 
-# In order for this to work, the script needs to be called with
-# the absolute path.
-cd $(dirname "${BASH_SOURCE[0]}")
+SCRIPT_PATH=$(dirname "${BASH_SOURCE[0]}")
+if [[ "${SCRIPT_PATH:0:1}" != "/" ]]; then
+  echo "This script needs to be called with the absolute path"
+  exit 1
+fi
+cd $SCRIPT_PATH
 
 source print-color.sh
 
@@ -85,6 +92,12 @@ done
 
 print_color white "Config was updated!"
 
-# Check and update (if necessary) all the dependencies
-# ./install-deps.sh update
-# print_color white "Deps were updated!"
+# Optional check for deps if the deps argument is present
+case "$1" in
+  deps)
+    checkDeps ;;
+  init)
+    ;;
+  *)
+    ;;
+esac

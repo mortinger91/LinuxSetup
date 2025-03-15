@@ -99,95 +99,138 @@ aptOptionalPackages=(
   "tcpdump"
 )
 
-function checkEssentialPackages() {
-  # Check that every essential package is installed from the aptEssentialPackages array
-
-  # Post packages install
+function installAptPackages() {
+  ${PKG_UPDATE}
+  for package in "${packages[@]}"; do
+    if ! dpkg-query -W -f='${Status}' ${package} 2>/dev/null | grep -q "ok installed"; then
+      ${PKG_INSTALL} ${package}
+    fi
+  done
 }
 
 function installManualPackages() {
-  echo "Cloning the best theme ever (michelebira)"
-  ${PKG_INSTALL} wget
-  curl -fsSL https://raw.githubusercontent.com/mortinger91/michelebira/refs/heads/master/michelebira.zsh-theme -P ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes
+  echo "Do you want to clone michelebira oh-my-zsh theme? (y/n)?"
+  read -r answer
+  if [[ "$answer" == [Yy]* ]]; then
+    echo "Cloning the best theme ever (michelebira)..."
+    ${PKG_INSTALL} wget
+    curl -fsSL https://raw.githubusercontent.com/mortinger91/michelebira/refs/heads/master/michelebira.zsh-theme -P ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes
+  fi
 
-  echo "Configure Xozide"
-  curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+  echo "Do you want to install Xozide? (y/n)?"
+  read -r answer
+  if [[ "$answer" == [Yy]* ]]; then
+    echo "Installing Xozide..."
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+  fi
 
-  echo " Install Visual Studio Code"
-  sudo mkdir -m 0755 -p /etc/apt/keyrings
-  curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /tmp/packages.microsoft.gpg
-  sudo install -D -o root -g root -m 644 /tmp/packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
-  echo "Types: deb
+  echo "Do you want to install Visual Studio Code? (y/n)?"
+  read -r answer
+  if [[ "$answer" == [Yy]* ]]; then
+    echo " Installing Visual Studio Code..."
+    sudo mkdir -m 0755 -p /etc/apt/keyrings
+    curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /tmp/packages.microsoft.gpg
+    sudo install -D -o root -g root -m 644 /tmp/packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
+    echo "Types: deb
 URIs: https://packages.microsoft.com/repos/code/
 Suites: stable
 Components: main
 Signed-By: /etc/apt/keyrings/packages.microsoft.gpg" \
-  | sudo tee /etc/apt/sources.list.d/vscode.sources > /dev/null
-  ${PKG_UPDATE}
-  ${PKG_INSTALL} code
+    | sudo tee /etc/apt/sources.list.d/vscode.sources > /dev/null
+    ${PKG_UPDATE}
+    ${PKG_INSTALL} code
+  fi
 
-  echo "Install Google Chrome"
-  wget https://dl.google.com/linux/direct/google-chrome-stable_current_${ARCH}.deb
-  wget -O /tmp/google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_${ARCH}.deb
-  sudo dpkg -i /tmp/google-chrome.deb
+  echo "Do you want to install Google Chrome? (y/n)?"
+  read -r answer
+  if [[ "$answer" == [Yy]* ]]; then
+    echo "Installing Google Chrome..."
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_${ARCH}.deb
+    wget -O /tmp/google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_${ARCH}.deb
+    sudo dpkg -i /tmp/google-chrome.deb
+  fi
 
-  echo "Install Wireshark"
-  ${PKG_INSTALL} wireshark
-  sudo usermod -a -G wireshark "${USERNAME}"
+  echo "Do you want to install Wireshark? (y/n)?"
+  read -r answer
+  if [[ "$answer" == [Yy]* ]]; then
+    echo "Installing Wireshark..."
+    ${PKG_INSTALL} wireshark
+    sudo usermod -a -G wireshark "${USERNAME}"
+  fi
 
-  echo "Install Rust Toolchain"
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+  echo "Do you want to install the Rust Toolchain? (y/n)?"
+  read -r answer
+  if [[ "$answer" == [Yy]* ]]; then
+    echo "Installing Rust Toolchain..."
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+  fi
 
-  echo "Install Docker"
-  sudo mkdir -m 0755 -p /etc/apt/keyrings
-  curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /tmp/docker.gpg
-  sudo install -D -o root -g root -m 644 /tmp/docker.gpg /etc/apt/keyrings/docker.gpg
-  echo "Types: deb
+  echo "Do you want to install Docker? (y/n)?"
+  read -r answer
+  if [[ "$answer" == [Yy]* ]]; then
+    echo "Installing Docker..."
+    sudo mkdir -m 0755 -p /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /tmp/docker.gpg
+    sudo install -D -o root -g root -m 644 /tmp/docker.gpg /etc/apt/keyrings/docker.gpg
+    echo "Types: deb
 URIs: https://download.docker.com/linux/debian/
 Suites: trixie
 Components: stable
 Signed-By: /etc/apt/keyrings/docker.gpg" \
-  | sudo tee /etc/apt/sources.list.d/docker.sources > /dev/null
-  ${PKG_UPDATE}
-  # If update throws an error try this command:
-  # sudo chmod a+r /etc/apt/keyrings/docker.gpg
-  ${PKG_INSTALL} docker docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-  sudo groupadd docker
-  sudo usermod -aG docker "${USERNAME}"
-  echo "Testing docker installation, reboot to test without sudo"
-  sudo docker run hello-world
+    | sudo tee /etc/apt/sources.list.d/docker.sources > /dev/null
+    ${PKG_UPDATE}
+    # If update throws an error try this command:
+    # sudo chmod a+r /etc/apt/keyrings/docker.gpg
+    ${PKG_INSTALL} docker docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    sudo groupadd docker
+    sudo usermod -aG docker "${USERNAME}"
+    echo "Testing docker installation, reboot to test without sudo"
+    sudo docker run hello-world
+  fi
 
-  echo "Install fzf"
-  git clone --depth 1 https://github.com/junegunn/fzf.git ~/dev/fzf
-  git -C ~/dev/fzf fetch --tags
-  # Switch to latest tag
-  git -C ~/dev/fzf switch --detach $(git -C ~/dev/fzf describe --tags `git -C ~/dev/fzf rev-list --tags --max-count=1`)
-  ~/dev/fzf/install --bin
-  # Used for fzf and other user installed binaries
-  mkdir -p /home/${USERNAME}/.local/bin
-  sudo mv -i ~/dev/fzf/bin/fzf /home/${USERNAME}/.local/bin
+  echo "Do you want to install fzf? (y/n)?"
+  read -r answer
+  if [[ "$answer" == [Yy]* ]]; then
+    echo "Installing fzf..."
+    git clone --depth 1 https://github.com/junegunn/fzf.git ~/dev/fzf
+    git -C ~/dev/fzf fetch --tags
+    # Switch to latest tag
+    git -C ~/dev/fzf switch --detach $(git -C ~/dev/fzf describe --tags `git -C ~/dev/fzf rev-list --tags --max-count=1`)
+    ~/dev/fzf/install --bin
+    # Used for fzf and other user installed binaries
+    mkdir -p /home/${USERNAME}/.local/bin
+    sudo mv -i ~/dev/fzf/bin/fzf /home/${USERNAME}/.local/bin
+  fi
 }
 
 function initInstall() {
-  echo "Running install script in init mode"
+  print_color green "Running install script in init mode"
   installAptPackages
   installManualPackages
 }
 
 function updateInstall() {
-  echo "Running install script in update mode"
-  checkEssentialPackages
+  installAptPackages
 }
 
 function manualInstall() {
-  echo "Running install script in manual mode"
-
+  print_color green "Running install script in manual mode"
+  installManualPackages
 }
 
 PKG_UPDATE="sudo apt-get update"
 PKG_INSTALL="sudo apt-get install -y"
 USERNAME=$(whoami)
 ARCH=$(dpkg --print-architecture)
+
+SCRIPT_PATH=$(dirname "${BASH_SOURCE[0]}")
+if [[ "${SCRIPT_PATH:0:1}" != "/" ]]; then
+  echo "This script needs to be called with the absolute path"
+  exit 1
+fi
+cd $SCRIPT_PATH
+
+source print-color.sh
 
 case "$1" in
   init)
@@ -198,5 +241,4 @@ case "$1" in
     manualInstall ;;
 esac
 
-
-#aaa
+print_color white "Deps were installed!"

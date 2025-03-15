@@ -6,7 +6,7 @@ function init_config() {
     exit 1
   fi
 
-  echo "Do you want to configure the system (y/n)?"
+  echo "Do you want to configure the system? (y/n)"
   read -r answer
   if [ "$answer" == "${answer#[Yy]}" ]; then
     print_color yellow "Exiting configuration script"
@@ -47,7 +47,7 @@ function init_config() {
 }
 
 function init_sudo() {
-  echo "Do you want to configure sudo (y/n)?"
+  echo "Do you want to configure sudo? (y/n?"
   read -r answer
   if [ "$answer" == "${answer#[Yy]}" ]; then
     print_color yellow "Skipping sudo configuration"
@@ -70,7 +70,7 @@ function init_sudo() {
 }
 
 function init_touchpad_gestures() {
-  echo "Do you want to configure touchpad gestures (y/n)?"
+  echo "Do you want to configure touchpad gestures? (y/n)"
   read -r answer
   if [ "$answer" == "${answer#[Yy]}" ]; then
     print_color yellow "Skipping touchpad gestures configuration"
@@ -92,7 +92,7 @@ function init_touchpad_gestures() {
   mkdir -p ~/.config >/dev/null 2>&1
 
   echo "Pick either xdotool or ydotool:"
-  echo "Use (x)dotool on x11 and (y)dotool on Wayland (x/y)?"
+  echo "Use (x)dotool on x11 and (y)dotool on Wayland (x/y)"
   read -r answer
   if [ "$answer" == "${answer#[Xx]}" ]; then
     echo "Configuring touchpad gestures to use xdotool"
@@ -170,7 +170,7 @@ gesture swipe right 4 ydotool key 29:1 20:1 20:0 29:0
 }
 
 function init_install_ohmyzsh() {
-  echo "Do you want to install oh my zsh (y/n)?"
+  echo "Do you want to install oh my zsh? (y/n)"
   read -r answer
   if [ "$answer" == "${answer#[Yy]}" ]; then
     print_color yellow "Skipping oh my zsh installation"
@@ -180,14 +180,14 @@ function init_install_ohmyzsh() {
   ${PKG_UPDATE}
   ${PKG_INSTALL} zsh
   ${PKG_INSTALL} curl
+  echo "After oh-my-zsh installation, exit to continue the setup"
   set -e
   sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
   set +e
-  # The script will exit here
 }
 
 function init_configure_zsh() {
-  echo "Do you want to configure zsh (y/n)?"
+  echo "Do you want to configure zsh? (y/n)"
   read -r answer
   if [ "$answer" == "${answer#[Yy]}" ]; then
     print_color yellow "Skipping zsh configuration"
@@ -211,13 +211,10 @@ fi" \
 
   print_color white "Showing ~/.zshrc file after changes:"
   cat ~/.zshrc
-
-  # Make zsh the default shell
-  chsh -s $(which zsh)
 }
 
 function init_git() {
-  echo "Do you want to perform git configuration (y/n)?"
+  echo "Do you want to perform git configuration? (y/n)"
   read -r answer
   if [ "$answer" == "${answer#[Yy]}" ]; then
     print_color yellow "Skipping git configuration"
@@ -239,8 +236,8 @@ function init_git() {
   git config --global pull.rebase false
   git config --global init.defaultBranch master
   touch /home/$USERNAME/.gitignore_global
-  git config --global core.excludesfile=/home/$USERNAME/.gitignore_global
-  echo "Do you want to setup git signing (y/n)?"
+  git config --global core.excludesfile /home/$USERNAME/.gitignore_global
+  echo "Do you want to setup git signing? (y/n)"
   read -r answer
   if [ "$answer" == "${answer#[Nn]}" ]; then
     echo "Insert gpg key ID:"
@@ -252,14 +249,14 @@ function init_git() {
   fi
 
   # Configuring git lfs
-  git lfs install --system
+  git lfs install
 
   print_color white "Review your git configuration"
   git config --global --list --show-origin
 }
 
 function init_grub() {
-  echo "Do you want to perform grub configuration (y/n)?"
+  echo "Do you want to perform grub configuration? (y/n)"
   read -r answer
   if [ "$answer" == "${answer#[Yy]}" ]; then
     print_color yellow "Skipping grub configuration"
@@ -268,6 +265,27 @@ function init_grub() {
   echo -e "\n# User defined resolution for grub\nGRUB_GFXMODE=640x480\n" \
   | sudo tee -a /etc/default/grub
   sudo update-grub
+}
+
+function install_packages() {
+  echo "Do you want to install the packages? (y/n)"
+  read -r answer
+  if [ "$answer" == "${answer#[Yy]}" ]; then
+    print_color yellow "Skipping packages installation"
+    return
+  fi
+  $SCRIPT_PATH/install-deps.sh init
+}
+
+function init_config_files() {
+  echo "Do you want to sync the config files? (y/n)"
+  read -r answer
+  if [ "$answer" == "${answer#[Yy]}" ]; then
+    print_color yellow "Skipping config files sync"
+    return
+  fi
+  # The init argument will make the script skip the deps check
+  $SCRIPT_PATH/update-config.sh init
 }
 
 SCRIPT_PATH=$(dirname "${BASH_SOURCE[0]}")
@@ -291,6 +309,8 @@ init_install_ohmyzsh
 init_configure_zsh
 init_git
 init_grub
+install_packages
+init_config_files
 
 print_color green "First setup completed!"
 print_color white "Close the terminal for all the changes to take place"
