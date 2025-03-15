@@ -47,7 +47,7 @@ function init_config() {
 }
 
 function init_sudo() {
-  echo "Do you want to configure sudo? (y/n?"
+  echo "Do you want to configure sudo? (y/n)"
   read -r answer
   if [ "$answer" == "${answer#[Yy]}" ]; then
     print_color yellow "Skipping sudo configuration"
@@ -194,6 +194,8 @@ function init_configure_zsh() {
     return
   fi
 
+  cat ~/.bash_history >> ~/.zsh_history
+
   # Add .zshrc_custom link to .zshrc file
   CONFIG_DIR=$SCRIPT_PATH
   CONFIG_DIR=${CONFIG_DIR%/}
@@ -304,6 +306,7 @@ PKG_UPDATE="sudo apt-get update"
 PKG_INSTALL="sudo apt-get install -y"
 
 init_config
+init_sudo
 init_touchpad_gestures
 init_install_ohmyzsh
 init_configure_zsh
