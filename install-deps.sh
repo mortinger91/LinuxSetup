@@ -77,6 +77,7 @@ aptEssentialPackages=(
   "xclip"
   "zsh-autosuggestions"
   "zsh-syntax-highlighting"
+  "sl"
 )
 
 openGLDevelopmentPackages=(
