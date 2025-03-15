@@ -44,7 +44,8 @@ function file_update() {
 
   if [ $diff_found -ne 0 ]; then
     echo "Showing diff between local and remote $(basename "$fileDest") file:"
-    if command -v code >/dev/null 2>&1; then
+    # Even if code is installed, we don't want to use it to show the diff if running in tty mode
+    if command -v code >/dev/null 2>&1 && [ -n "$XDG_SESSION_TYPE" ] && [ "$XDG_SESSION_TYPE" != "tty" ]; then
       code --diff $fileDest $fileSource
     else
       git --no-pager diff --no-index --color=always $fileDest $fileSource
