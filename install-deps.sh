@@ -214,6 +214,7 @@ Signed-By: /etc/apt/keyrings/docker.gpg" \
 sudo /usr/bin/gdbOriginal \"\$@\"" \
     | sudo tee /usr/bin/gdb > /dev/null
     sudo chmod +x /usr/bin/gdb
+    sudo chmod +x /usr/bin/gdbOriginal
   fi
 
 }
