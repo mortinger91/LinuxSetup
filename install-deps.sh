@@ -211,9 +211,9 @@ Signed-By: /etc/apt/keyrings/docker.gpg" \
     sudo mv -i /usr/bin/gdb /usr/bin/gdbOriginal
     sudo touch /usr/bin/gdb
     echo "#!/bin/bash
-sudo /usr/bin/gdbOriginal \"$@\"" \
+sudo /usr/bin/gdbOriginal \"\$@\"" \
     | sudo tee /usr/bin/gdb > /dev/null
-    sudo chmod +x gdb
+    sudo chmod +x /usr/bin/gdb
   fi
 
 }
