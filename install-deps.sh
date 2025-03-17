@@ -192,31 +192,30 @@ Signed-By: /etc/apt/keyrings/docker.gpg" \
   read -r answer
   if [[ "$answer" == [Yy]* ]]; then
     echo "Installing fzf..."
-    git clone --depth 1 https://github.com/junegunn/fzf.git ~/dev/fzf
-    git -C ~/dev/fzf fetch --tags
+    git clone --depth 1 https://github.com/junegunn/fzf.git /home/${USERNAME}/dev/fzf
+    git -C /home/${USERNAME}/dev/fzf fetch --tags
     # Switch to latest tag
-    git -C ~/dev/fzf switch --detach $(git -C ~/dev/fzf describe --tags `git -C ~/dev/fzf rev-list --tags --max-count=1`)
-    ~/dev/fzf/install --bin
+    git -C /home/${USERNAME}/dev/fzf switch --detach $(git -C /home/${USERNAME}/dev/fzf describe --tags `git -C /home/${USERNAME}/dev/fzf rev-list --tags --max-count=1`)
+    /home/${USERNAME}/dev/fzf/install --bin
     # Used for fzf and other user installed binaries
     mkdir -p /home/${USERNAME}/.local/bin
-    sudo mv -i ~/dev/fzf/bin/fzf /home/${USERNAME}/.local/bin
+    sudo mv -i /home/${USERNAME}/dev/fzf/bin/fzf /home/${USERNAME}/.local/bin
   fi
 
-  # This can also be used to update the gdb binary
-  echo "Do you want to perform gdb process decoration to debug using root in VSCode? (y/n)"
+  # This eliminates the need for process decoration or swapping the actual binary
+  # in /usr/bin/gdb.
+  # The gdb binary can be updated normally via apt and this needs to be
+  # done only once
+  echo "Do you want to install run_gdb_as_root for root debugging in VSCode? (y/n)"
   read -r answer
   if [[ "$answer" == [Yy]* ]]; then
-    echo "Decorating gdb..."
-    ${PKG_INSTALL} gdb
-    sudo mv -i /usr/bin/gdb /usr/bin/gdbOriginal
-    sudo touch /usr/bin/gdb
-    echo "#!/bin/bash
-sudo /usr/bin/gdbOriginal \"\$@\"" \
-    | sudo tee /usr/bin/gdb > /dev/null
-    sudo chmod +x /usr/bin/gdb
-    sudo chmod +x /usr/bin/gdbOriginal
+    echo "Installing run_gdb_as_root..."
+    mkdir -p /home/${USERNAME}/.local/bin
+    echo -e '#!/bin/bash
+sudo /usr/bin/gdb "$@"' \
+    > /home/${USERNAME}/.local/bin/run_gdb_as_root
+    chmod +x /home/${USERNAME}/.local/bin/run_gdb_as_root
   fi
-
 }
 
 function initInstall() {
