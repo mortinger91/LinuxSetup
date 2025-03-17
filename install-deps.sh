@@ -108,21 +108,21 @@ function installAptPackages() {
 }
 
 function installManualPackages() {
-  echo "Do you want to clone michelebira oh-my-zsh theme? (y/n)?"
+  echo "Do you want to clone michelebira oh-my-zsh theme? (y/n)"
   read -r answer
   if [[ "$answer" == [Yy]* ]]; then
     echo "Cloning the best theme ever (michelebira)..."
     curl -fsSL https://raw.githubusercontent.com/mortinger91/michelebira/refs/heads/master/michelebira.zsh-theme -o ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes/michelebira.zsh-theme
   fi
 
-  echo "Do you want to install Xozide? (y/n)?"
+  echo "Do you want to install Xozide? (y/n)"
   read -r answer
   if [[ "$answer" == [Yy]* ]]; then
     echo "Installing Xozide..."
     curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
   fi
 
-  echo "Do you want to install Visual Studio Code? (y/n)?"
+  echo "Do you want to install Visual Studio Code? (y/n)"
   read -r answer
   if [[ "$answer" == [Yy]* ]]; then
     echo " Installing Visual Studio Code..."
@@ -139,7 +139,7 @@ Signed-By: /etc/apt/keyrings/packages.microsoft.gpg" \
     ${PKG_INSTALL} code
   fi
 
-  echo "Do you want to install Google Chrome? (y/n)?"
+  echo "Do you want to install Google Chrome? (y/n)"
   read -r answer
   if [[ "$answer" == [Yy]* ]]; then
     echo "Installing Google Chrome..."
@@ -148,7 +148,7 @@ Signed-By: /etc/apt/keyrings/packages.microsoft.gpg" \
     sudo dpkg -i /tmp/google-chrome.deb
   fi
 
-  echo "Do you want to install Wireshark? (y/n)?"
+  echo "Do you want to install Wireshark? (y/n)"
   read -r answer
   if [[ "$answer" == [Yy]* ]]; then
     echo "Installing Wireshark..."
@@ -163,10 +163,12 @@ Signed-By: /etc/apt/keyrings/packages.microsoft.gpg" \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
   fi
 
-  echo "Do you want to install Docker? (y/n)?"
+  # TODO: Currently broken, fix it
+  echo "Do you want to install Docker? (y/n)"
   read -r answer
   if [[ "$answer" == [Yy]* ]]; then
     echo "Installing Docker..."
+    echo "Docker installation is currently broken"; return
     sudo mkdir -m 0755 -p /etc/apt/keyrings
     curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /tmp/docker.gpg
     sudo install -D -o root -g root -m 644 /tmp/docker.gpg /etc/apt/keyrings/docker.gpg
@@ -186,7 +188,7 @@ Signed-By: /etc/apt/keyrings/docker.gpg" \
     sudo docker run hello-world
   fi
 
-  echo "Do you want to install fzf? (y/n)?"
+  echo "Do you want to install fzf? (y/n)"
   read -r answer
   if [[ "$answer" == [Yy]* ]]; then
     echo "Installing fzf..."
@@ -199,6 +201,21 @@ Signed-By: /etc/apt/keyrings/docker.gpg" \
     mkdir -p /home/${USERNAME}/.local/bin
     sudo mv -i ~/dev/fzf/bin/fzf /home/${USERNAME}/.local/bin
   fi
+
+  # This can also be used to update the gdb binary
+  echo "Do you want to perform gdb process decoration to debug using root in VSCode? (y/n)"
+  read -r answer
+  if [[ "$answer" == [Yy]* ]]; then
+    echo "Decorating gdb..."
+    ${PKG_INSTALL} gdb
+    sudo mv -i /usr/bin/gdb /usr/bin/gdbOriginal
+    sudo touch /usr/bin/gdb
+    echo "#!/bin/bash
+sudo /usr/bin/gdbOriginal \"$@\"" \
+    | sudo tee /usr/bin/gdb > /dev/null
+    sudo chmod +x gdb
+  fi
+
 }
 
 function initInstall() {
