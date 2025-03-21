@@ -96,6 +96,7 @@ aptOptionalPackages=(
   "nginx"
   "telegram-desktop"
   "tcpdump"
+  "virt-manager"
 )
 
 function installAptPackages() {
