@@ -72,7 +72,7 @@ alias ..='cd ..'
 alias xclip='xclip -selection clipboard'
 
 # Try fwupdtool in case of issues with fwupdmgr. Override the new alias in the _local file
-alias up='sudo apt update && sudo apt full-upgrade -y && sudo fwupdmgr update'
+alias up='sudo apt update && sudo apt full-upgrade && sudo fwupdmgr update'
 
 # INTERFACE is defined in ~/.zshrc
 function whatsmyip() {
