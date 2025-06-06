@@ -5,7 +5,7 @@ After the first install, the config can be easily updated.
 This helps if you want to keep multiple machines in sync with the same config.  
 Supports Debian-like systems.
 
-## How to configure the project for the first time:
+## First time setup on a new machine:
 
 1 - choose a folder: `~/dev`  
 2 - `mkdir ~/dev`  
@@ -14,6 +14,10 @@ Supports Debian-like systems.
 
 Make sure to use the absolute path of the repo when running the `init-config.sh` script.
 
-## How to update your local config:
+## How to pull latest changes to your local config:
 
 1 - `update-config`
+
+## How to add changes to the remote config:
+
+1 - Modify or add any new file in the `scripts` private repo. Do not push new changes to this repo, they will be overridden
