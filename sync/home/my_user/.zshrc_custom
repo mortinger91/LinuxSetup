@@ -6,10 +6,13 @@ HYPHEN_INSENSITIVE="true"
 zstyle ':omz:update' mode reminder
 zstyle ':omz:update' frequency 14
 COMPLETION_WAITING_DOTS="true"
-plugins=(git)
+plugins=(git timer)
 # These are no longer omz plugins since they are installed as apt packages
 source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+export TIMER_THRESHOLD=2    # Only show for commands >2 seconds
+export TIMER_PRECISION=1    # Show 1 decimal place
 
 source $ZSH/oh-my-zsh.sh
 
