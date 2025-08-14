@@ -106,6 +106,8 @@ function installAptPackages() {
       ${PKG_INSTALL} ${package}
     fi
   done
+  # create a symbolic link for bat. This is better than an alias since it works also for `sudo bat`
+  sudo ln -s /usr/bin/batcat /usr/local/bin/bat >/dev/null 2>&1
 }
 
 function installManualPackages() {

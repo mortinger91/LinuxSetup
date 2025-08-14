@@ -51,7 +51,8 @@ alias mv='mv -i'
 
 alias df='df -h'
 
-alias bat='batcat'
+# Removed since there's a sym link doing the same thing
+#alias bat='batcat'
 
 alias grep='rg'
 
