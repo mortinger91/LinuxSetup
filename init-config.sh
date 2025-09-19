@@ -246,8 +246,8 @@ function init_git() {
     read -r keyid
     git config --global user.signingKey "${keyid}"
     git config --global commit.gpgSign true
-    else
-        git config --global commit.gpgSign false
+  else
+      git config --global commit.gpgSign false
   fi
 
   # Configuring git lfs
