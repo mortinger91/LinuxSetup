@@ -77,6 +77,7 @@ alias up='sudo apt update && sudo apt full-upgrade && sudo fwupdmgr update'
 
 # INTERFACE is defined in ~/.zshrc
 function whatsmyip() {
+  timeout=3
   # Internal IP Lookup.
   if command -v ip >/dev/null 2>&1; then
     echo -n "Internal IP: "
@@ -85,11 +86,33 @@ function whatsmyip() {
     echo -n "Internal IP: "
     ifconfig $INTERFACE | grep "inet " | awk '{print $2}'
   fi
+  echo ""
 
   # External IP Lookup
   echo -n "External IP: "
-  curl -s ipinfo.io
-  echo
+  local ip_output ip_exit_code
+  ip_output=$(timeout ${timeout}s curl -s ipinfo.io 2>&1)
+  ip_exit_code=$?
+  if [ $ip_exit_code -eq 0 ]; then
+    echo "$ip_output"
+  elif [ $ip_exit_code -eq 124 ]; then
+    echo "curl timeout"
+  else
+    echo "curl error: $ip_output"
+  fi
+  echo ""
+
+  echo -n "DNS: "
+  local dns_output dns_exit_code
+  dns_output=$(timeout ${timeout}s nslookup google.com 2>&1)
+  dns_exit_code=$?
+  if [ $dns_exit_code -eq 0 ]; then
+    echo "$dns_output" | grep "^Address:" | head -n 1 | awk '{print $2}'
+  elif [ $dns_exit_code -eq 124 ]; then
+    echo "nslookup timeout"
+  else
+    echo "nslookup error: $dns_output"
+  fi
 }
 alias myip="whatsmyip"
 
