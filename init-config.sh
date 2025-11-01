@@ -8,7 +8,7 @@ function init_config() {
 
   echo "Do you want to configure the system? (y/n)"
   read -r answer
-  if [ "$answer" == "${answer#[Yy]}" ]; then
+  if [[ "$answer" == "${answer#[Yy]}" ]]; then
     print_color yellow "Exiting configuration script"
     exit 1
   fi
@@ -49,7 +49,7 @@ function init_config() {
 function init_sudo() {
   echo "Do you want to configure sudo? (y/n)"
   read -r answer
-  if [ "$answer" == "${answer#[Yy]}" ]; then
+  if [[ "$answer" == "${answer#[Yy]}" ]]; then
     print_color yellow "Skipping sudo configuration"
     return
   fi
@@ -72,7 +72,7 @@ function init_sudo() {
 function init_touchpad_gestures() {
   echo "Do you want to configure touchpad gestures? (y/n)"
   read -r answer
-  if [ "$answer" == "${answer#[Yy]}" ]; then
+  if [[ "$answer" == "${answer#[Yy]}" ]]; then
     print_color yellow "Skipping touchpad gestures configuration"
     return
   fi
@@ -94,7 +94,7 @@ function init_touchpad_gestures() {
   echo "Pick either xdotool or ydotool:"
   echo "Use (x)dotool on x11 and (y)dotool on Wayland (x/y)"
   read -r answer
-  if [ "$answer" == "${answer#[Xx]}" ]; then
+  if [[ "$answer" == "${answer#[Xx]}" ]]; then
     echo "Configuring touchpad gestures to use xdotool"
 
     ${PKG_INSTALL} xdotool
@@ -172,7 +172,7 @@ gesture swipe right 4 ydotool key 29:1 20:1 20:0 29:0
 function init_install_ohmyzsh() {
   echo "Do you want to install oh my zsh? (y/n)"
   read -r answer
-  if [ "$answer" == "${answer#[Yy]}" ]; then
+  if [[ "$answer" == "${answer#[Yy]}" ]]; then
     print_color yellow "Skipping oh my zsh installation"
     return
   fi
@@ -189,7 +189,7 @@ function init_install_ohmyzsh() {
 function init_configure_zsh() {
   echo "Do you want to configure zsh? (y/n)"
   read -r answer
-  if [ "$answer" == "${answer#[Yy]}" ]; then
+  if [[ "$answer" == "${answer#[Yy]}" ]]; then
     print_color yellow "Skipping zsh configuration"
     return
   fi
@@ -218,7 +218,7 @@ fi" \
 function init_git() {
   echo "Do you want to perform git configuration? (y/n)"
   read -r answer
-  if [ "$answer" == "${answer#[Yy]}" ]; then
+  if [[ "$answer" == "${answer#[Yy]}" ]]; then
     print_color yellow "Skipping git configuration"
     return
   fi
@@ -241,7 +241,7 @@ function init_git() {
   git config --global core.excludesfile /home/$USERNAME/.gitignore_global
   echo "Do you want to setup git signing? (y/n)"
   read -r answer
-  if [ "$answer" == "${answer#[Nn]}" ]; then
+  if [[ "$answer" == "${answer#[Nn]}" ]]; then
     echo "Insert gpg key ID:"
     read -r keyid
     git config --global user.signingKey "${keyid}"
@@ -260,7 +260,7 @@ function init_git() {
 function init_grub() {
   echo "Do you want to perform grub configuration? (y/n)"
   read -r answer
-  if [ "$answer" == "${answer#[Yy]}" ]; then
+  if [[ "$answer" == "${answer#[Yy]}" ]]; then
     print_color yellow "Skipping grub configuration"
     return
   fi
@@ -272,7 +272,7 @@ function init_grub() {
 function install_packages() {
   echo "Do you want to install the packages? (y/n)"
   read -r answer
-  if [ "$answer" == "${answer#[Yy]}" ]; then
+  if [[ "$answer" == "${answer#[Yy]}" ]]; then
     print_color yellow "Skipping packages installation"
     return
   fi
@@ -282,7 +282,7 @@ function install_packages() {
 function init_config_files() {
   echo "Do you want to sync the config files? (y/n)"
   read -r answer
-  if [ "$answer" == "${answer#[Yy]}" ]; then
+  if [[ "$answer" == "${answer#[Yy]}" ]]; then
     print_color yellow "Skipping config files sync"
     return
   fi

@@ -52,7 +52,7 @@ function file_update() {
     fi
     print_color yellow "Do you want to update $fileDest (y/n)?"
     read -r answer
-    if [ "$answer" == "${answer#[Yy]}" ]; then
+    if [[ "$answer" == "${answer#[Yy]}" ]]; then
       print_color red "Not updating $(basename "$fileDest")"
     else
       # Save the original owner of the file
