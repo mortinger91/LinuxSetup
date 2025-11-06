@@ -75,6 +75,19 @@ alias xclip='xclip -selection clipboard'
 # Try fwupdtool in case of issues with fwupdmgr. Override the new alias in the _local file
 alias up='sudo apt update && sudo apt full-upgrade && sudo fwupdmgr update'
 
+function rebaseMasterImpl() {
+  currentBranch=$(git branch --show-current)
+  echo "Do you want to rebase $currentBranch with current master? (y/n)"
+  read -r answer
+  if [[ "$answer" = "${answer#[Yy]}" ]]; then
+    echo "Skipped the rebase"
+    return
+  fi
+  git fetch origin master:master
+  git rebase master
+}
+alias rebasemaster="rebaseMasterImpl"
+
 # INTERFACE is defined in ~/.zshrc
 function whatsmyip() {
   timeout=3
