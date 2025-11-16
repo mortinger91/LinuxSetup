@@ -19,7 +19,7 @@ function update_config() {
   BEFORE_PULL=$(git -C $CONFIG_DIR rev-list --count HEAD)
   git -C $CONFIG_DIR pull >/dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo "git pull failed, you have local changes in your working directory"
+    echo "git pull failed, you have local changes in your working directory or you are not online"
     return
   fi
   AFTER_PULL=$(git -C $CONFIG_DIR rev-list --count HEAD)
