@@ -88,6 +88,8 @@ function rebaseMasterImpl() {
 }
 alias rebasemaster="rebaseMasterImpl"
 
+alias squash="git commit -a --amend --no-edit"
+
 # INTERFACE is defined in ~/.zshrc
 function whatsmyip() {
   timeout=3
