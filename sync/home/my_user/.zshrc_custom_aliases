@@ -90,6 +90,8 @@ alias rebasemaster="rebaseMasterImpl"
 
 alias squash="git commit -a --amend --no-edit"
 
+alias resethard="git fetch && git reset --hard origin/$(git branch --show-current)"
+
 # INTERFACE is defined in ~/.zshrc
 function whatsmyip() {
   timeout=3
