@@ -70,6 +70,7 @@ aptEssentialPackages=(
   "ssh"
   "sshfs"
   "ssl-cert"
+  "systemd-timesyncd"
   "tcpdump"
   "trash-cli"
   "tmux"
