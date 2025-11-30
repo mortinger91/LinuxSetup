@@ -62,6 +62,7 @@ aptEssentialPackages=(
   "nmap"
   "net-tools"
   "network-manager-openvpn"
+  "nfs-common"
   "make"
   "openssl"
   "python3"
@@ -169,29 +170,29 @@ Signed-By: /etc/apt/keyrings/packages.microsoft.gpg" \
   fi
 
   # TODO: Currently broken, fix it
-  echo "Do you want to install Docker? (y/n)"
-  read -r answer
-  if [[ "$answer" == [Yy]* ]]; then
-    echo "Installing Docker..."
-    echo "Docker installation is currently broken"; return
-    sudo mkdir -m 0755 -p /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /tmp/docker.gpg
-    sudo install -D -o root -g root -m 644 /tmp/docker.gpg /etc/apt/keyrings/docker.gpg
-    echo "Types: deb
-URIs: https://download.docker.com/linux/debian/
-Suites: trixie
-Components: stable
-Signed-By: /etc/apt/keyrings/docker.gpg" \
-    | sudo tee /etc/apt/sources.list.d/docker.sources > /dev/null
-    ${PKG_UPDATE}
-    # If update throws an error try this command:
-    # sudo chmod a+r /etc/apt/keyrings/docker.gpg
-    ${PKG_INSTALL} docker docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-    sudo groupadd docker
-    sudo usermod -aG docker "${USERNAME}"
-    echo "Testing docker installation, reboot to test without sudo"
-    sudo docker run hello-world
-  fi
+#   echo "Do you want to install Docker? (y/n)"
+#   read -r answer
+#   if [[ "$answer" == [Yy]* ]]; then
+#     echo "Installing Docker..."
+#     echo "Docker installation is currently broken"; return
+#     sudo mkdir -m 0755 -p /etc/apt/keyrings
+#     curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /tmp/docker.gpg
+#     sudo install -D -o root -g root -m 644 /tmp/docker.gpg /etc/apt/keyrings/docker.gpg
+#     echo "Types: deb
+# URIs: https://download.docker.com/linux/debian/
+# Suites: trixie
+# Components: stable
+# Signed-By: /etc/apt/keyrings/docker.gpg" \
+#     | sudo tee /etc/apt/sources.list.d/docker.sources > /dev/null
+#     ${PKG_UPDATE}
+#     # If update throws an error try this command:
+#     # sudo chmod a+r /etc/apt/keyrings/docker.gpg
+#     ${PKG_INSTALL} docker docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+#     sudo groupadd docker
+#     sudo usermod -aG docker "${USERNAME}"
+#     echo "Testing docker installation, reboot to test without sudo"
+#     sudo docker run hello-world
+#   fi
 
   echo "Do you want to install fzf? (y/n)"
   read -r answer

@@ -50,7 +50,7 @@ function init_sudo() {
   echo "Do you want to configure sudo? (y/n)"
   read -r answer
   if [[ "$answer" == "${answer#[Yy]}" ]]; then
-    print_color yellow "Skipping sudo configuration"
+    print_color yellow "Skipped sudo configuration"
     return
   fi
 
@@ -73,7 +73,7 @@ function init_touchpad_gestures() {
   echo "Do you want to configure touchpad gestures? (y/n)"
   read -r answer
   if [[ "$answer" == "${answer#[Yy]}" ]]; then
-    print_color yellow "Skipping touchpad gestures configuration"
+    print_color yellow "Skipped touchpad gestures configuration"
     return
   fi
 
@@ -173,7 +173,7 @@ function init_install_ohmyzsh() {
   echo "Do you want to install oh my zsh? (y/n)"
   read -r answer
   if [[ "$answer" == "${answer#[Yy]}" ]]; then
-    print_color yellow "Skipping oh my zsh installation"
+    print_color yellow "Skipped oh my zsh installation"
     return
   fi
 
@@ -190,7 +190,7 @@ function init_configure_zsh() {
   echo "Do you want to configure zsh? (y/n)"
   read -r answer
   if [[ "$answer" == "${answer#[Yy]}" ]]; then
-    print_color yellow "Skipping zsh configuration"
+    print_color yellow "Skipped zsh configuration"
     return
   fi
 
@@ -219,7 +219,7 @@ function init_git() {
   echo "Do you want to perform git configuration? (y/n)"
   read -r answer
   if [[ "$answer" == "${answer#[Yy]}" ]]; then
-    print_color yellow "Skipping git configuration"
+    print_color yellow "Skipped git configuration"
     return
   fi
 
@@ -261,7 +261,7 @@ function init_grub() {
   echo "Do you want to perform grub configuration? (y/n)"
   read -r answer
   if [[ "$answer" == "${answer#[Yy]}" ]]; then
-    print_color yellow "Skipping grub configuration"
+    print_color yellow "Skipped grub configuration"
     return
   fi
   echo -e "\n# User defined resolution for grub\nGRUB_GFXMODE=640x480\n" \
@@ -273,7 +273,7 @@ function install_packages() {
   echo "Do you want to install the packages? (y/n)"
   read -r answer
   if [[ "$answer" == "${answer#[Yy]}" ]]; then
-    print_color yellow "Skipping packages installation"
+    print_color yellow "Skipped packages installation"
     return
   fi
   $SCRIPT_PATH/install-deps.sh init
@@ -283,7 +283,7 @@ function init_config_files() {
   echo "Do you want to sync the config files? (y/n)"
   read -r answer
   if [[ "$answer" == "${answer#[Yy]}" ]]; then
-    print_color yellow "Skipping config files sync"
+    print_color yellow "Skipped config files sync"
     return
   fi
   # The init argument will make the script skip the deps check
