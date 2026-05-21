@@ -59,7 +59,7 @@ function init_sudo() {
   # Right now NOPASSWD is on ALL which is not ideal (but still quite convenient).
   # Change it to something like this to include only some commands:
   # NOPASSWD:/usr/bin/apt update, /usr/bin/apt upgrade
-  su -c "echo \"${USERNAME} ALL=(ALL:ALL) NOPASSWD: ALL\" | tee /etc/sudoers.d/${USERNAME}"
+  su -c "echo \"${USERNAME} ALL=(root) NOPASSWD: ALL\" | tee /etc/sudoers.d/${USERNAME}"
 
   echo "sudo configuration completed!"
 
