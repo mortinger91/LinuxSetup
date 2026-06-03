@@ -99,6 +99,11 @@ function resethardImpl() {
 }
 alias resethard="resethardImpl"
 
+function reSignImpl() {
+  git rebase --force-rebase -S "$@"
+}
+alias resign="reSignImpl"
+
 # INTERFACE is defined in ~/.zshrc
 function whatsmyip() {
   timeout=3
