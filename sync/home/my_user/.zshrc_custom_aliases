@@ -46,7 +46,7 @@ alias update-config='update_config'
 
 ## General aliases
 
-#-a shows all file, -l long list format, -h human-readable, -F add symbols like / for dirs, --color forces colored output
+# -a shows all file, -l long list format, -h human-readable, -F add symbols like / for dirs, --color forces colored output
 alias ls='ls -lahF --color=always'
 
 alias cp='cp -i'
@@ -67,10 +67,10 @@ else
   alias rm='rm -i'
 fi
 
-#-p create all the nested directories
+# -p create all the nested directories
 alias mkdir='mkdir -p'
 
-#-a shows all users' processes, -u user-oriented output, -x includes processes without TTY, -f shows process hierarchy (forest)
+# -a shows all users' processes, -u user-oriented output, -x includes processes without TTY, -f shows process hierarchy (forest)
 alias ps='ps auxf'
 
 alias ..='cd ..'
@@ -82,7 +82,7 @@ alias up='sudo apt update && sudo apt full-upgrade && sudo fwupdmgr update'
 
 # INTERFACE is defined in ~/.zshrc
 function whatsmyip() {
-  timeout=3
+  timeout=10
   # Internal IP Lookup.
   if command -v ip >/dev/null 2>&1; then
     echo -n "Internal IP: "
@@ -133,8 +133,106 @@ function fzf_preview() {
 }
 alias lsf='fzf_preview'
 
+# Usage: githist DSS
+# Prints all the commits that have changes containing the word.
+# Of each commit only the diffs of files that contains the word are shown.
+# It prints 3 lines above and below the changed line with the word
 function git_history() {
-  git log -S "$1" --format="%H" | xargs -I {} git show {} | grep -C 3 "$1"
+  git --no-pager log -G "$1" -p --color=always | \
+  awk -v term="$1" '
+    BEGIN { ctx = 3; first_commit = 1; in_commit_header = 0 }
+
+    {
+      clean_line = $0
+      gsub(/\033\[[0-9;]*m/, "", clean_line)
+
+      # 1. Detect a new commit
+      if (clean_line ~ /^commit [0-9a-fA-F]+/) {
+
+        if (!first_commit) {
+          # Close the previous commit body with a bottom border
+          print "==========================================================="
+          # Add 2 blank lines (spaces) between commits
+          print ""
+          print ""
+        }
+
+        first_commit = 0
+        in_commit_header = 1
+
+        # Print the commit line Bold, Yellow, and wrapped in ## FIRST
+        print "\033[1;33m## " clean_line " ##\033[0m"
+
+        # Open the commit body with a top border SECOND
+        print "==========================================================="
+        next
+      }
+
+      if (clean_line ~ /^diff --git/) {
+        in_commit_header = 0
+        header = $0
+        header_printed = 0
+        buf_count = 0
+        after_count = 0
+        next
+      }
+
+      if (in_commit_header) {
+        print $0
+        next
+      }
+
+      if (clean_line ~ /^@@ -/) {
+        hunk = $0
+        hunk_printed = 0
+        next
+      }
+
+      if (clean_line ~ term && clean_line ~ /^[-+]/ && clean_line !~ /^--- / && clean_line !~ /^\+\+\+ /) {
+
+        if (!header_printed) {
+          print "\n" header
+          header_printed = 1
+        }
+
+        if (!hunk_printed) {
+          print hunk
+          hunk_printed = 1
+        }
+
+        for (i = 0; i < buf_count; i++) {
+          print buf[(buf_start + i) % ctx]
+        }
+        buf_count = 0
+
+        gsub(term, "\033[1m" term "\033[22m")
+        print $0
+
+        after_count = ctx
+        next
+      }
+
+      if (after_count > 0) {
+        print $0
+        after_count--
+        next
+      }
+
+      buf[(buf_start + buf_count) % ctx] = $0
+      if (buf_count < ctx) {
+        buf_count++
+      } else {
+        buf_start = (buf_start + 1) % ctx
+      }
+    }
+
+    # 2. When the script finishes, close the very last commit border
+    END {
+      if (!first_commit) {
+        print "==========================================================="
+      }
+    }
+  '
 }
 alias githist='git_history'
 
