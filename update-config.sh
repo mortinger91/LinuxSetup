@@ -56,14 +56,21 @@ function file_update() {
       print_color red "Not updating $(basename "$fileDest")"
     else
       # Save the original owner of the file
-      local owner=$(stat -c "%U:%G" $fileDest)
+      local ownerAndGroup=$(stat -c "%U:%G" $fileDest)
+      local owner=$(stat -c "%U" $fileDest)
       local ownerPermissions=$(stat -c "%a" $fileDest)
-      sudo cp -i -p $fileSource $fileDest
-      # Restore the original owner of the file.
-      # Git does not maintain the original owner when you commit a file
-      sudo chown $owner $fileDest
-      # Restore also original permission
-      sudo chmod $ownerPermissions "$fileDest"
+      # Only use sudo for root-owned files; user-owned files don't need it
+      if [ "$owner" = "root" ]; then
+        sudo cp -i -p $fileSource $fileDest
+        # Restore the original owner of the file.
+        # Git does not maintain the original owner when you commit a file
+        sudo chown $ownerAndGroup $fileDest
+        # Restore also original permission
+        sudo chmod $ownerPermissions "$fileDest"
+      else
+        cp -i -p $fileSource $fileDest
+        chmod $ownerPermissions "$fileDest"
+      fi
     fi
   fi
 }
