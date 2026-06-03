@@ -1,5 +1,7 @@
 ### My zsh common aliases ###
 
+## Internals
+
 # This function pulls the latest changes from git
 # before the `update-config.sh` script runs.
 # This is needed in order to run the latest version of the script.
@@ -42,6 +44,8 @@ function update_config() {
 }
 alias update-config='update_config'
 
+## General aliases
+
 #-a shows all file, -l long list format, -h human-readable, -F add symbols like / for dirs, --color forces colored output
 alias ls='ls -lahF --color=always'
 
@@ -54,6 +58,7 @@ alias df='df -h'
 # Removed since there's a sym link doing the same thing
 #alias bat='batcat'
 
+# sometimes ripgrep misbehaves so it is still needed to use /usr/bin/grep
 alias grep='rg'
 
 if command -v trash >/dev/null 2>&1; then
@@ -74,35 +79,6 @@ alias xclip='xclip -selection clipboard'
 
 # Try fwupdtool in case of issues with fwupdmgr. Override the new alias in the _local file
 alias up='sudo apt update && sudo apt full-upgrade && sudo fwupdmgr update'
-
-# Git aliases
-function rebaseMasterImpl() {
-  currentBranch=$(git branch --show-current)
-  echo "Do you want to rebase $currentBranch with current master? (y/n)"
-  read -r answer
-  if [[ "$answer" = "${answer#[Yy]}" ]]; then
-    echo "Skipped the rebase"
-    return
-  fi
-  git fetch origin master:master
-  git rebase master
-}
-alias rebasemaster="rebaseMasterImpl"
-
-function squashImpl() {
-  git commit -a --amend --no-edit
-}
-alias squash="squashImpl"
-
-function resethardImpl() {
-  git fetch && git reset --hard origin/$(git branch --show-current)
-}
-alias resethard="resethardImpl"
-
-function reSignImpl() {
-  git rebase --force-rebase -S "$@"
-}
-alias resign="reSignImpl"
 
 # INTERFACE is defined in ~/.zshrc
 function whatsmyip() {
@@ -161,6 +137,49 @@ function git_history() {
   git log -S "$1" --format="%H" | xargs -I {} git show {} | grep -C 3 "$1"
 }
 alias githist='git_history'
+
+## Git aliases
+
+# Rebase the current branch with origin/master
+function rebaseMasterImpl() {
+  currentBranch=$(git branch --show-current)
+  echo "Do you want to rebase $currentBranch with current master? (y/n)"
+  read -r answer
+  if [[ "$answer" = "${answer#[Yy]}" ]]; then
+    echo "Skipped the rebase"
+    return
+  fi
+  # master:master should not be needed as long as the remote tracking branch
+  # of local master is origin/master
+  git fetch origin master:master
+  git rebase master
+}
+alias rebasemaster="rebaseMasterImpl"
+
+# Squash all the changes in the working directory onto the last commit
+function squashImpl() {
+  git commit -a --amend --no-edit
+}
+alias squash="squashImpl"
+
+# Reset the local branch to the state in remote
+function resethardImpl() {
+  git fetch && git reset --hard origin/$(git branch --show-current)
+}
+alias resethard="resethardImpl"
+
+# Force re-sign of all commits after the SHA provided
+# Usage: resign 123qwdasdsad1123
+function reSignImpl() {
+  git rebase --force-rebase -S "$@"
+}
+alias resign="reSignImpl"
+
+# Deletes the last commit and put the changes back in the working directory
+function resetCommitImpl() {
+  git reset --soft HEAD~1
+}
+alias resetcommit="resetCommitImpl"
 
 # My zsh system-specific aliases:
 if [ -f ~/.zshrc_custom_aliases_local ]; then
