@@ -262,9 +262,12 @@ function squashImpl() {
 }
 alias squash="squashImpl"
 
-# Reset the local branch to the state in remote
+# Reset the local branch to the state in remote, preserving working dir changes via stash
 function resethardImpl() {
+  local before=$(git stash list | wc -l)
+  git stash
   git fetch && git reset --hard origin/$(git branch --show-current)
+  [ $(git stash list | wc -l) -gt $before ] && git stash apply
 }
 alias resethard="resethardImpl"
 
