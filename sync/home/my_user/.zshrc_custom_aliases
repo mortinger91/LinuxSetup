@@ -32,8 +32,10 @@ function update_config() {
     echo "No new changes were pulled"
   fi
   # The script is run even when no updates were fetched from remote
-  # because the local configuration could have changed
+  # because the local configuration could have changed.
+  # e.g. you uninstalled an application in the deps list
   $CONFIG_DIR/update-config.sh deps
+
   # Sourcing .zshrc otherwise the new aliases and changes
   # won't be available in the current terminal after the script has ended.
   #
