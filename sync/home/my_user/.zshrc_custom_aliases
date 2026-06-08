@@ -284,6 +284,12 @@ function resetCommitImpl() {
 }
 alias resetcommit="resetCommitImpl"
 
+# Count the commits in the current branch
+function countCommitsImpl() {
+  git rev-list --count HEAD
+}
+alias countcommits="countCommitsImpl"
+
 # My zsh system-specific aliases:
 if [ -f ~/.zshrc_custom_aliases_local ]; then
   . ~/.zshrc_custom_aliases_local
