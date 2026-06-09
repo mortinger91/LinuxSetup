@@ -33,8 +33,11 @@ export EDITOR=nano
 
 # n: don't show line numbers, a: search is faster, s: cut blank lines
 # i: no case-sensitive search, x8: tab stops to 8 spaces,
-# mouse and wheel-lines: settings for mouse/trackpad scrolling
-export LESS='-nasix8 --mouse --wheel-lines=2'
+# mouse, wheel-lines: settings for mouse/trackpad scrolling
+# -F (quit immediately if output fits on one screen).
+# -X (--no-init) — Don't send the terminal initialization/deinitialization strings (termcap ti/te) when entering/exiting less. Practically: the screen doesn't clear when you quit less, so the output stays visible in your terminal history
+# -R (--RAW-CONTROL-CHARS) — Pass ANSI color/bold/underline escape sequences through to the terminal so they render as actual colors. Other escape sequences are still shown as-is. Without this, all escape codes print literally.
+export LESS='-nasix8FXR --mouse --wheel-lines=2'
 
 export COMPILER_LAUNCHER=ccache
 
