@@ -121,6 +121,17 @@ function installManualPackages() {
     curl -fsSL https://raw.githubusercontent.com/mortinger91/michelebira/refs/heads/master/michelebira.zsh-theme -o ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes/michelebira.zsh-theme
   fi
 
+  echo "Do you want to setup oh-my-zsh plugins? (y/n)"
+  read -r answer
+  if [[ "$answer" == [Yy]* ]]; then
+    git clone https://github.com/Aloxaf/fzf-tab ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/fzf-tab
+
+    # These are installed as apt packages now,
+    # so we don't need to clone the git repo anymore
+    # zsh-autosuggestions
+    # zsh-syntax-highlighting
+  fi
+
   echo "Do you want to install Xozide? (y/n)"
   read -r answer
   if [[ "$answer" == [Yy]* ]]; then

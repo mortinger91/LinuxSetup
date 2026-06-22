@@ -6,7 +6,7 @@ HYPHEN_INSENSITIVE="true"
 zstyle ':omz:update' mode reminder
 zstyle ':omz:update' frequency 14
 COMPLETION_WAITING_DOTS="true"
-plugins=(git timer)
+plugins=(git timer fzf-tab)
 # These are no longer omz plugins since they are installed as apt packages
 source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
@@ -20,6 +20,50 @@ export PATH=/usr/bin:/home/michele/.local/bin:/snap/bin:$PATH
 
 # Set up fzf key bindings and fuzzy completion
 eval "$(fzf --zsh)"
+
+# --- Fuzzy `git switch <partial><Tab>` ----------------------------------
+# Typing `git switch <text>` then Tab opens fzf over all branches with
+# <text> prefilled as the (fuzzy) query. Anything else defers to fzf-tab.
+_fzf_git_switch_widget() {
+  setopt local_options extended_glob
+
+  # Match `git [..]switch[..]<rest>` (also `sw`), cursor at end of line.
+  if [[ $CURSOR == $#BUFFER && \
+        $BUFFER == (#b)git[[:space:]]##(switch|sw)[[:space:]]##(*) ]]; then
+    local query=$match[2]
+
+    # Flags / branch creation -> let normal completion handle it.
+    if [[ $query == -* ]]; then
+      zle fzf-tab-complete
+      return
+    fi
+
+    local branches selected
+    branches=$(
+      {
+        git for-each-ref --sort=-committerdate \
+            --format='%(refname:short)' refs/heads
+        git for-each-ref --format='%(refname:short)' refs/remotes \
+          | sed 's@^[^/]*/@@'
+      } 2>/dev/null | awk '!seen[$0]++ && $0 != "HEAD"'
+    )
+
+    if [[ -n $branches ]]; then
+      selected=$(print -rl -- ${(f)branches} \
+        | fzf --height=50% --layout=reverse --query="$query" --select-1)
+      if [[ -n $selected ]]; then
+        BUFFER="git switch $selected"
+        CURSOR=$#BUFFER
+      fi
+    fi
+    zle reset-prompt
+  else
+    zle fzf-tab-complete
+  fi
+}
+zle -N _fzf_git_switch_widget
+bindkey '^I' _fzf_git_switch_widget
+# ------------------------------------------------------------------------
 
 # Set up zoxide smart directory navigator
 eval "$(zoxide init zsh)"
