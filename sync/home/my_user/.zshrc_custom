@@ -6,7 +6,7 @@ HYPHEN_INSENSITIVE="true"
 zstyle ':omz:update' mode reminder
 zstyle ':omz:update' frequency 14
 COMPLETION_WAITING_DOTS="true"
-plugins=(git timer fzf-tab)
+plugins=(git fzf-tab)
 # These are no longer omz plugins since they are installed as apt packages
 source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
@@ -63,7 +63,47 @@ _fzf_git_switch_widget() {
 }
 zle -N _fzf_git_switch_widget
 bindkey '^I' _fzf_git_switch_widget
-# ------------------------------------------------------------------------
+
+# command-status line: green ✔ on success, red ✗ code on failure + timer
+zmodload zsh/datetime                    # provides $EPOCHREALTIME
+autoload -Uz add-zsh-hook
+
+_STATUS_MIN_SECONDS=3                     # only show timing above this (0 = always)
+
+_status_fmt() {                          # 6.3 -> 6.3s ; 125.4 -> 2m5.4s
+  local -F secs=$1
+  local out=
+  local -i h m
+  (( h = secs / 3600 )); secs=$(( secs - h * 3600 ))
+  (( m = secs / 60   )); secs=$(( secs - m * 60   ))
+  (( h )) && out+="${h}h"
+  (( m )) && out+="${m}m"
+  out+="$(printf '%.1f' $secs)s"
+  print -r -- $out
+}
+
+_status_preexec() { _cmd_start=$EPOCHREALTIME }
+
+_status_precmd() {
+  local code=$?                          # MUST be the first line
+  RPROMPT=''                             # kill the theme's right-side exit code
+  [[ -z $_cmd_start ]] && return         # bare Enter -> print nothing
+
+  local -F elapsed=$(( EPOCHREALTIME - _cmd_start ))
+  unset _cmd_start
+
+  local parts=()
+  if (( code != 0 )); then
+    parts+=( "%F{red}✗ ${code} ↵%f" )
+  else
+    parts+=( "%F{green}✔%f" )
+  fi
+  (( elapsed >= _STATUS_MIN_SECONDS )) && parts+=( "%F{cyan}⏱ $(_status_fmt $elapsed)%f" )
+  (( $#parts )) && print -P -- "${(j: :)parts}"
+}
+
+add-zsh-hook preexec _status_preexec
+add-zsh-hook precmd  _status_precmd
 
 # Set up zoxide smart directory navigator
 eval "$(zoxide init zsh)"
