@@ -258,7 +258,11 @@ alias rebasemaster="rebaseMasterImpl"
 
 # Squash all the changes in the working directory onto the last commit
 function squashImpl() {
-  git commit -a --amend --no-edit
+  if git diff --cached --quiet; then
+    echo "squashImpl: no staged changes to squash" >&2
+    return 1
+  fi
+  git commit --amend --no-edit
 }
 alias squash="squashImpl"
 
@@ -283,6 +287,7 @@ function resetCommitImpl() {
   git reset --soft HEAD~1
 }
 alias resetcommit="resetCommitImpl"
+alias commitreset="resetCommitImpl"
 
 # Count the commits in the current branch
 function countCommitsImpl() {
