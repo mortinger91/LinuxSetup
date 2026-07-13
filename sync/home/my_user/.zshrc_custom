@@ -94,7 +94,7 @@ _status_precmd() {
 
   local parts=()
   if (( code != 0 )); then
-    parts+=( "%F{red}✗ ${code} ↵%f" )
+    parts+=( "%F{red}✗ ${code}%f" )
   else
     parts+=( "%F{green}✔%f" )
   fi
