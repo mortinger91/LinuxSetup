@@ -239,13 +239,22 @@ function init_git() {
   git config --global init.defaultBranch master
   touch /home/$USERNAME/.gitignore_global
   git config --global core.excludesfile /home/$USERNAME/.gitignore_global
+  git config --global rerere.enabled true # Remembers git conflict resolution and apply them automatically
+  git config --global column.ui auto
+  git config --global branch.sort -committerdate
+  git config --global alias.pushf "push --force-with-lease"  # does not force push the branch if remote does not match with local branch (e.g. someone pushed on that branch, you never fetched, you rebase and force push deleting all the new commits)
+  git config --global push.useForceIfIncludes true # Harden --force-with-lease: refuse if remote has commits not in your reflog. This means if you fetched but still your branch is not synced with the remote
+  git config --global core.untrackedcache true
+  git config --global core.fsmonitor true # This makes git status fast on large repos
+
+
   echo "Do you want to setup git signing? (y/n)"
   read -r answer
   if [[ "$answer" == "${answer#[Nn]}" ]]; then
     echo "Insert gpg key ID:"
     read -r keyid
-    git config --global user.signingKey "${keyid}"
     git config --global commit.gpgSign true
+    git config --global user.signingKey "${keyid}"
   else
       git config --global commit.gpgSign false
   fi

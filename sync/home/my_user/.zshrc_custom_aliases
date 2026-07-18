@@ -135,6 +135,8 @@ function fzf_preview() {
 }
 alias lsf='fzf_preview'
 
+## Git aliases
+
 # Usage: githist DSS
 # Prints all the commits that have changes containing the word.
 # Of each commit only the diffs of files that contains the word are shown.
@@ -238,8 +240,6 @@ function git_history() {
 }
 alias githist='git_history'
 
-## Git aliases
-
 # Rebase the current branch with origin/master
 function rebaseMasterImpl() {
   currentBranch=$(git branch --show-current)
@@ -251,12 +251,21 @@ function rebaseMasterImpl() {
   fi
   # master:master should not be needed as long as the remote tracking branch
   # of local master is origin/master
+  local before=$(git stash list | wc -l)
+  git stash
+  local stashed=0
+  [ $(git stash list | wc -l) -gt $before ] && stashed=1
+  [ $stashed -eq 1 ] && echo "Stashed working directory changes before rebase"
   git fetch origin master:master
   git rebase master
+  if [ $stashed -eq 1 ]; then
+    git stash apply
+    echo "Restored stashed working directory changes"
+  fi
 }
 alias rebasemaster="rebaseMasterImpl"
 
-# Squash all the changes in the working directory onto the last commit
+# Squash all the staged changes in the working directory onto the last commit
 function squashImpl() {
   if git diff --cached --quiet; then
     echo "squashImpl: no staged changes to squash" >&2
@@ -270,14 +279,24 @@ alias squash="squashImpl"
 function resethardImpl() {
   local before=$(git stash list | wc -l)
   git stash
+  local stashed=0
+  [ $(git stash list | wc -l) -gt $before ] && stashed=1
+  [ $stashed -eq 1 ] && echo "Stashed working directory changes before reset"
   git fetch && git reset --hard origin/$(git branch --show-current)
-  [ $(git stash list | wc -l) -gt $before ] && git stash apply
+  if [ $stashed -eq 1 ]; then
+    git stash apply
+    echo "Restored stashed working directory changes"
+  fi
 }
 alias resethard="resethardImpl"
 
 # Force re-sign of all commits after the SHA provided
 # Usage: resign 123qwdasdsad1123
 function reSignImpl() {
+  if [ -z "$1" ]; then
+    echo "Error: no SHA provided. Usage: resign <sha>" >&2
+    return 1
+  fi
   git rebase --force-rebase -S "$@"
 }
 alias resign="reSignImpl"
