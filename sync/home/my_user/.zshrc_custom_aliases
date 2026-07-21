@@ -269,7 +269,20 @@ alias rebasemaster="rebaseMasterImpl"
 function squashImpl() {
   if git diff --cached --quiet; then
     echo "squashImpl: no staged changes to squash" >&2
-    return 1
+    printf "Stage all files? [y/N] "
+    read -r reply
+    case "$reply" in
+      [yY]|[yY][eE][sS])
+        git add -A
+        if git diff --cached --quiet; then
+          echo "squashImpl: nothing to stage" >&2
+          return 1
+        fi
+        ;;
+      *)
+        return 1
+        ;;
+    esac
   fi
   git commit --amend --no-edit
 }
