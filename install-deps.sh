@@ -50,6 +50,7 @@ aptEssentialPackages=(
   "gparted"
   "gzip"
   "htop"
+  "kitty-terminfo"
   "locales-all"
   "locate"
   "libevdev-dev"
