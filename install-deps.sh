@@ -189,6 +189,13 @@ Signed-By: /etc/apt/keyrings/packages.microsoft.gpg" \
     curl -fsSL "https://go.dev/dl/${goVersion}.linux-${ARCH}.tar.gz" -o /tmp/go.tar.gz
     # Never extract on top of an existing /usr/local/go, it produces broken installs
     sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf /tmp/go.tar.gz
+    rm -f /tmp/go.tar.gz
+    # Verify the installed version matches the one that was downloaded
+    if /usr/local/go/bin/go version 2>/dev/null | grep -qw "${goVersion:-none}"; then
+      print_color green "Installed $(/usr/local/go/bin/go version)"
+    else
+      print_color red "Go installation failed (expected version: '${goVersion}')"
+    fi
   fi
 
   # Official method: https://docs.docker.com/engine/install/debian/
