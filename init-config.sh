@@ -177,10 +177,11 @@ function init_install_ohmyzsh() {
     return
   fi
 
+  print_color green "After oh-my-zsh installation, exit to continue the setup!"
+  sleep 1
   ${PKG_UPDATE}
   ${PKG_INSTALL} zsh
   ${PKG_INSTALL} curl
-  echo "After oh-my-zsh installation, exit to continue the setup"
   set -e
   sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
   set +e
