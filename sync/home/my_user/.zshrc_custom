@@ -16,7 +16,7 @@ export TIMER_PRECISION=1    # Show 1 decimal place
 
 source $ZSH/oh-my-zsh.sh
 
-export PATH=/usr/bin:/home/michele/.local/bin:/snap/bin:$PATH
+export PATH=/usr/bin:/home/michele/.local/bin:/snap/bin:$PATH:/usr/local/go/bin:/home/michele/go/bin
 
 # Set up fzf key bindings and fuzzy completion
 eval "$(fzf --zsh)"
