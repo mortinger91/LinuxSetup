@@ -244,6 +244,7 @@ function init_git() {
   git config --global branch.sort -committerdate
   git config --global alias.pushf "push --force-with-lease"  # does not force push the branch if remote does not match with local branch (e.g. someone pushed on that branch, you never fetched, you rebase and force push deleting all the new commits)
   git config --global push.useForceIfIncludes true # Harden --force-with-lease: refuse if remote has commits not in your reflog. This means if you fetched but still your branch is not synced with the remote
+  git config --global core.autocrlf input # Convert CRLF to LF on commit, never convert on checkout. Prevents Windows line endings from entering repos
   git config --global core.untrackedcache true
   git config --global core.fsmonitor true # This makes git status fast on large repos
 
