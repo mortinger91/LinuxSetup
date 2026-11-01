@@ -104,8 +104,8 @@ swipe_threshold 0\n
 # Gestures:
 gesture swipe left 3 xdotool key ctrl+shift+Tab
 gesture swipe right 3 xdotool key ctrl+Tab
-gesture swipe left 4 xdotool key ctrl+Left
-gesture swipe right 4 xdotool key ctrl+Right
+# gesture swipe left 4 xdotool key ctrl+w
+# gesture swipe right 4 xdotool key ctrl+t
 # These have no effect due to Kwin KDE6 already using these gestures (ARGH!)
 # gesture swipe up 3 xdotool key ctrl+alt+Up
 # gesture swipe down 3 xdotool key ctrl+alt+Down' \
@@ -149,8 +149,9 @@ swipe_threshold 0\n
 # Gestures:
 gesture swipe left 3 ydotool key 29:1 42:1 15:1 15:0 29:0 42:0
 gesture swipe right 3 ydotool key 29:1 15:1 15:0 29:0
-gesture swipe left 4 ydotool key 29:1 105:1 105:0 29:0
-gesture swipe right 4 ydotool key 29:1 106:1 106:0 29:0
+# Disabled since swipe horizontal 4 fingeris is used to change desktop by Kwin
+# gesture swipe left 4 ydotool key 29:1 17:1 17:0 29:0
+# gesture swipe right 4 ydotool key 29:1 20:1 20:0 29:0
 # These have no effect due to Kwin KDE6 already using these gestures (ARGH!)
 # gesture swipe up 3 ydotool key ctrl+alt+Up
 # gesture swipe down 3 ydotool key ctrl+alt+Down' \
@@ -167,6 +168,53 @@ gesture swipe right 4 ydotool key 29:1 106:1 106:0 29:0
   #   libinput-gestures-setup status
   # this can be needed (run it in the repo folder):
   #   sudo libinput-gestures-setup install
+}
+
+function init_kwin_gestures() {
+  echo "Do you want to disable KWin's 3-finger horizontal swipe with InputActions? (y/n)"
+  read -r answer
+  if [[ "$answer" == "${answer#[Yy]}" ]]; then
+    print_color yellow "Skipped InputActions installation"
+    return
+  fi
+
+  # KWin (Plasma 6) hardcodes 3- and 4-finger horizontal swipes to switch
+  # virtual desktops. The InputActions KWin plugin blocks the 3-finger one,
+  # so libinput-gestures can use 3-finger left/right for tab switching.
+  # 4-finger left/right keeps switching desktops natively.
+  ${PKG_UPDATE}
+  ${PKG_INSTALL} curl git cmake g++ extra-cmake-modules qt6-declarative-dev \
+    qt6-tools-dev kwin-dev libkf6configwidgets-dev gettext libkf6kcmutils-dev \
+    libyaml-cpp-dev libxkbcommon-dev pkg-config libevdev-dev libdrm-dev \
+    libcli11-dev liblayershellqtinterface-dev
+
+  # Building InputActions (installs to /usr via "sudo make install")
+  mkdir -p ~/dev >/dev/null 2>&1
+  curl -fsSL -o ~/dev/inputactions-installer.sh \
+    https://raw.githubusercontent.com/InputActions/installer/refs/heads/main/install.sh
+  chmod +x ~/dev/inputactions-installer.sh
+  ~/dev/inputactions-installer.sh --ctl --kwin --latest-stable
+
+  mkdir -p ~/.config/inputactions >/dev/null 2>&1
+  echo -e 'touchpad:
+  gestures:
+    # Block KWin'"'"'s built-in 3-finger horizontal desktop switch;
+    # libinput-gestures uses 3-finger left/right for tabs.
+    - type: swipe
+      fingers: 3
+      direction: left_right' \
+  > ~/.config/inputactions/config.yaml
+
+  # Enabling the plugin now and at login
+  kwriteconfig6 --file kwinrc --group Plugins --key kwin_gesturesEnabled true
+  qdbus6 org.kde.KWin /Effects org.kde.kwin.Effects.loadEffect kwin_gestures
+
+  # NOTES
+  # After a Plasma update, rerun the installer and restart KWin:
+  #   ~/dev/inputactions-installer.sh --ctl --kwin --latest-stable
+  # If KWin crashes repeatedly, remove "kwin_gesturesEnabled=true" from ~/.config/kwinrc
+  # If a bad config makes input unusable, hold backspace+space+enter for 2s
+  # Check config with: inputactions config issues
 }
 
 function init_install_ohmyzsh() {
@@ -307,6 +355,7 @@ PKG_INSTALL="sudo apt-get install -y"
 init_config
 init_sudo
 init_touchpad_gestures
+init_kwin_gestures
 init_install_ohmyzsh
 init_configure_zsh
 init_git
