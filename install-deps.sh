@@ -140,6 +140,13 @@ function installManualPackages() {
     curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
   fi
 
+  echo "Do you want to install opencode? (y/n)"
+  read -r answer
+  if [[ "$answer" == [Yy]* ]]; then
+    echo "Installing opencode..."
+    curl -fsSL https://opencode.ai/install | bash
+  fi
+
   echo "Do you want to install Visual Studio Code? (y/n)"
   read -r answer
   if [[ "$answer" == [Yy]* ]]; then

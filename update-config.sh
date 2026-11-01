@@ -89,6 +89,7 @@ fi
 cd $SCRIPT_PATH
 
 source print-color.sh
+source git-config.sh
 
 # Get all files in the sync folder
 mapfile -t files < <(find sync -type f)
@@ -97,6 +98,8 @@ mapfile -t files < <(find sync -type f)
 for file in "${files[@]}"; do
   file_update "$file"
 done
+
+update_git_config
 
 print_color white "Config was updated!"
 

@@ -77,6 +77,8 @@ alias ps='ps auxf'
 
 alias ..='cd ..'
 
+alias oc='opencode'
+
 alias xclip='xclip -selection clipboard'
 
 # Try fwupdtool in case of issues with fwupdmgr. Override the new alias in the _local file

@@ -234,21 +234,8 @@ function init_git() {
   echo "Insert git user.email:"
   read -r email
   git config --global user.email "${email}"
-  git config --global credential.usehttppath true
-  git config --global pull.ff only
-  git config --global pull.rebase false
-  git config --global init.defaultBranch master
-  touch /home/$USERNAME/.gitignore_global
-  git config --global core.excludesfile /home/$USERNAME/.gitignore_global
-  git config --global rerere.enabled true # Remembers git conflict resolution and apply them automatically
-  git config --global column.ui auto
-  git config --global branch.sort -committerdate
-  git config --global alias.pushf "push --force-with-lease"  # does not force push the branch if remote does not match with local branch (e.g. someone pushed on that branch, you never fetched, you rebase and force push deleting all the new commits)
-  git config --global push.useForceIfIncludes true # Harden --force-with-lease: refuse if remote has commits not in your reflog. This means if you fetched but still your branch is not synced with the remote
-  git config --global core.autocrlf input # Convert CRLF to LF on commit, never convert on checkout. Prevents Windows line endings from entering repos
-  git config --global core.untrackedcache true
-  git config --global core.fsmonitor true # This makes git status fast on large repos
-
+  # Shared with update-config.sh, see git-config.sh
+  apply_git_config
 
   echo "Do you want to setup git signing? (y/n)"
   read -r answer
@@ -309,6 +296,7 @@ fi
 cd $SCRIPT_PATH
 
 source print-color.sh
+source git-config.sh
 
 print_color green "New Linux installation setup"
 
