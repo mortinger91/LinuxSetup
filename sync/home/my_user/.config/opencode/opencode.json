@@ -1,0 +1,128 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "plan",
+  "permission": {
+    "edit": "ask",
+    "read": "allow",
+    "external_directory": {
+      "*": "ask",
+      "~/dev/**": "allow"
+    },
+    "bash": {
+      "*": "ask",
+      "cat *": "allow",
+      "echo *": "allow",
+      "grep *": "allow",
+      "rg *": "allow",
+      "ls *": "allow",
+      "ls": "allow",
+      "head *": "allow",
+      "tail *": "allow",
+      "less *": "allow",
+      "more *": "allow",
+      "find *": "allow",
+      "file *": "allow",
+      "wc *": "allow",
+      "stat *": "allow",
+      "du *": "allow",
+      "df *": "allow",
+      "tree *": "allow",
+      "tree": "allow",
+      "diff *": "allow",
+      "comm *": "allow",
+      "sort *": "allow",
+      "uniq *": "allow",
+      "cut *": "allow",
+      "tr *": "allow",
+      "fold *": "allow",
+      "column *": "allow",
+      "nl *": "allow",
+      "paste *": "allow",
+      "pr *": "allow",
+      "tac *": "allow",
+      "rev *": "allow",
+      "expand *": "allow",
+      "unexpand *": "allow",
+      "od *": "allow",
+      "hexdump *": "allow",
+      "xxd *": "allow",
+      "strings *": "allow",
+      "basename *": "allow",
+      "dirname *": "allow",
+      "realpath *": "allow",
+      "readlink *": "allow",
+      "which *": "allow",
+      "where *": "allow",
+      "type *": "allow",
+      "jq *": "allow",
+      "yq *": "allow",
+      "awk *": "allow",
+      "sed *": "allow",
+      "pwd": "allow",
+      "whoami": "allow",
+      "hostname": "allow",
+      "uname *": "allow",
+      "uname": "allow",
+      "date": "allow",
+      "date *": "allow",
+      "cal *": "allow",
+      "cal": "allow",
+      "uptime": "allow",
+      "id": "allow",
+      "id *": "allow",
+      "env": "allow",
+      "printenv *": "allow",
+      "printenv": "allow",
+      "history": "allow",
+      "git status *": "allow",
+      "git status": "allow",
+      "git log *": "allow",
+      "git log": "allow",
+      "git diff *": "allow",
+      "git diff": "allow",
+      "git show *": "allow",
+      "git show": "allow",
+      "git branch *": "allow",
+      "git branch": "allow",
+      "git remote *": "allow",
+      "git remote": "allow",
+      "git blame *": "allow",
+      "git blame": "allow",
+      "gh *": "allow",
+      "gh": "allow"
+    }
+  },
+  "agent": {
+    "cavecrew-investigator": { "mode": "subagent" },
+    "cavecrew-builder": { "mode": "subagent" },
+    "cavecrew-reviewer": { "mode": "subagent" },
+    "commit": { "mode": "subagent", "hidden": true }
+  },
+  "mcp": {
+    "github": {
+      "type": "local",
+      "command": ["github-mcp-server", "stdio"],
+      "enabled": true,
+      "environment": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "{env:GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    }
+  },
+  "compaction": {
+    "auto": false,
+    "prune": false
+  },
+  "experimental": {
+    "disable_paste_summary": true
+  },
+  "lsp": {
+    "clangd": {
+      "command": ["clangd", "--compile-commands-dir=out/xvn_debug_arm64"]
+    }
+  },
+  "plugin": [
+    "./plugins/caveman/plugin.js",
+    "./plugins/session-title/plugin.js",
+    "opencode-claude-auth@2.2.1"
+  ]
+}

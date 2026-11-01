@@ -1,0 +1,19 @@
+{
+  "common": {
+    "project": { "key": "KDT" },
+    "priority": { "name": "Normal" },
+    "components": [{ "name": "Qt" }],
+    "assignee": { "accountId": "6294bc6d658d58006887a890" },
+    "customfield_12515": { "value": "Desktop" },
+    "customfield_12694": [{ "value": "ExpressVPN" }]
+  },
+  "task": {
+    "issuetype": { "name": "Task" }
+  },
+  "bug": {
+    "issuetype": { "name": "Bug" },
+    "customfield_11923": { "value": "S3 Moderate" },
+    "customfield_12693": { "value": "Production" }
+  },
+  "initialStatusId": "10206"
+}

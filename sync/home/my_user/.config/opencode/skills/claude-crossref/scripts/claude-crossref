@@ -1,0 +1,105 @@
+#!/bin/bash
+# claude-crossref: run claude code on the same question opencode answered,
+# compare both answers, return a merged cross-reference file.
+#
+# Usage:
+#   claude-crossref --question  "<text>" --opencode-answer "<text>"
+#   claude-crossref --question-file <path> --opencode-answer-file <path>
+#
+# Steps:
+#   1. Pick next free nonce: /tmp/opencode-claude-cross-0, -1, -2, ... (never overwrite)
+#   2. Write question + opencode answer to that file
+#   3. Call: claude -p "<prompt using the file as input>" --allowed-tools "Read Grep Glob"
+#      --effort max --max-turns 10  (read-only, same cwd)
+#   4. Append claude's answer + claude's opinion on the opencode answer to the same file
+#   5. Print the file path on stdout (last line) -> opencode reads it for the final merge
+#
+# Exit codes:
+#   0  ok, file path on stdout
+#   1  bad args
+#   2  claude call failed
+
+set -euo pipefail
+
+QUESTION=""
+OC_ANSWER=""
+Q_FILE=""
+OC_FILE=""
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --question)
+      QUESTION="$2"; shift 2 ;;
+    --opencode-answer)
+      OC_ANSWER="$2"; shift 2 ;;
+    --question-file)
+      Q_FILE="$2"; shift 2 ;;
+    --opencode-answer-file)
+      OC_FILE="$2"; shift 2 ;;
+    *)
+      echo "unknown arg: $1" >&2; exit 1 ;;
+  esac
+done
+
+# Resolve question / opencode answer from files if requested
+if [ -n "$Q_FILE" ]; then QUESTION="$(cat "$Q_FILE")"; fi
+if [ -n "$OC_FILE" ]; then OC_ANSWER="$(cat "$OC_FILE")"; fi
+
+if [ -z "$QUESTION" ] || [ -z "$OC_ANSWER" ]; then
+  echo "need both --question and --opencode-answer (or their -file variants)" >&2
+  exit 1
+fi
+
+# 1. Next free nonce
+BASE="/tmp/opencode-claude-cross"
+N=0
+while [ -e "${BASE}-${N}" ]; do N=$((N+1)); done
+OUT="${BASE}-${N}"
+touch "$OUT"
+
+# 2. Write question + opencode answer
+{
+  printf 'question: %s\n\n' "$QUESTION"
+  printf 'opencode answer: %s\n\n' "$OC_ANSWER"
+} > "$OUT"
+
+# 3. Build prompt for claude: read the input file, answer the question, then compare.
+#    Claude has only Read/Grep/Glob, so it cannot edit the file. It must print
+#    structured text to stdout; we append that verbatim below.
+PROMPT="Read the file at ${OUT}. It contains a section starting with 'question:' and a section starting with 'opencode answer:'.
+
+Another agent (opencode) already investigated the repo and produced the 'opencode answer'. Your job is to CROSS-CHECK that answer, not to re-investigate from scratch.
+
+Do this:
+1. Read the opencode answer carefully.
+2. Use Read/Grep/Glob to verify its specific claims (file paths, symbol names, setting fields, git branches). Be surgical — only read files mentioned in the opencode answer, or greps targeted at specific symbols. Do NOT explore broadly.
+3. Form your own answer to the question, building on what opencode found and correcting anything you can disprove from the repo.
+
+Print your response as EXACTLY these two sections, with these exact markers, nothing before or after:
+
+claude answer: <your answer to the question>
+
+claude opinion on opencode answer: <brief comparison: where you agree, disagree, or where the opencode answer goes off track. Cite file paths or greps as evidence when disagreeing. Be specific>
+
+Do not modify any files in the repo. Use only Read/Grep/Glob. Output only the two sections above."
+
+# 4. Call claude
+set +e
+CLAUDE_OUT="$(claude -p "$PROMPT" --allowed-tools "Read Grep Glob" --effort max --max-turns 20 2>&1)"
+RC=$?
+set -e
+
+if [ $RC -ne 0 ]; then
+  printf 'claude call failed (exit %s)\n%s\n' "$RC" "$CLAUDE_OUT" >> "$OUT"
+  echo "$OUT"
+  echo "claude-crossref: claude call failed (exit $RC)" >&2
+  exit 2
+fi
+
+# 5. Append claude's structured stdout verbatim (it printed the two sections)
+{
+  printf '%s\n' "$CLAUDE_OUT"
+} >> "$OUT"
+
+# 6. Emit path for opencode to read
+echo "$OUT"

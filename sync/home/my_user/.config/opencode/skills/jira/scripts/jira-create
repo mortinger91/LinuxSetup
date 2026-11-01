@@ -1,0 +1,149 @@
+#!/usr/bin/env bash
+# Create a KDT ticket from ../template.json via Jira REST v2, assigned to Michele, then move it to
+# Ready to Start. Prints the ticket URL. Requires JIRA_API_TOKEN; login read from jira-cli config.
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+Usage: jira-create -s SUMMARY --os PLATFORM [options]
+  -s, --summary TEXT      Summary (required)
+      --os PLATFORM       Required. linux | windows | macos | cross (shared code: Core / Cross)
+  -d, --description TEXT  Description, Jira wiki markup ("-" reads stdin)
+  -t, --type task|bug     Issue type (default: task)
+      --severity S1..S5   Bug only (default: S3 Moderate). S1 Catastrophic, S2 Severe,
+                          S3 Moderate, S4 Minor, S5 Cosmetics
+      --env VALUE         Bug only (default: production). during-dev = Development/During Dev,
+                          or "Parent/Child", e.g. "Staging/Automation"
+      --label NAME        Label. Repeatable
+      --priority NAME     Priority (default: Normal)
+      --parent KEY        Parent epic (none by default)
+      --dry-run           Print the payload, do not create
+EOF
+}
+
+SITE="https://polymoon.atlassian.net"
+SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+TEMPLATE="$SKILL_DIR/template.json"
+
+summary="" description="" type="task" severity="" env="" os="" priority="" parent="" dry_run=0
+labels=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -s|--summary) summary="$2"; shift 2 ;;
+    -d|--description) description="$2"; shift 2 ;;
+    -t|--type) type="$(echo "$2" | tr '[:upper:]' '[:lower:]')"; shift 2 ;;
+    --severity) severity="$2"; shift 2 ;;
+    --env) env="$2"; shift 2 ;;
+    --os) os="$2"; shift 2 ;;
+    --label) labels+=("$2"); shift 2 ;;
+    --priority) priority="$2"; shift 2 ;;
+    --parent) parent="$2"; shift 2 ;;
+    --dry-run) dry_run=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "Unknown argument: $1" >&2; usage >&2; exit 2 ;;
+  esac
+done
+
+[[ -n "$summary" ]] || { echo "Missing --summary" >&2; usage >&2; exit 2; }
+[[ "$type" == "task" || "$type" == "bug" ]] || { echo "--type must be task or bug" >&2; exit 2; }
+[[ "$description" == "-" ]] && description="$(cat)"
+
+case "$(echo "$os" | tr '[:upper:]' '[:lower:]')" in
+  linux) os="Linux" ;;
+  windows|win) os="Windows" ;;
+  macos|mac) os="macOS" ;;
+  cross|core|"core / cross") os="Core / Cross" ;;
+  "") echo "Missing --os (linux | windows | macos | cross)" >&2; exit 2 ;;
+  *) echo "--os must be linux | windows | macos | cross" >&2; exit 2 ;;
+esac
+
+if [[ "$type" != "bug" && ( -n "$severity" || -n "$env" ) ]]; then
+  echo "--severity and --env only apply to --type bug" >&2; exit 2
+fi
+
+if [[ -n "$severity" ]]; then
+  case "$(echo "$severity" | tr '[:lower:]' '[:upper:]' | cut -c1-2)" in
+    S1) severity="S1 Catastrophic" ;;
+    S2) severity="S2 Severe" ;;
+    S3) severity="S3 Moderate" ;;
+    S4) severity="S4 Minor" ;;
+    S5) severity="S5 Cosmetics" ;;
+    *) echo "--severity must be S1..S5" >&2; exit 2 ;;
+  esac
+fi
+
+# Environment list is option-with-child; Production has no child.
+env_json=""
+case "$(echo "$env" | tr '[:upper:]' '[:lower:]')" in
+  "") ;;
+  production) env_json='{"value":"Production"}' ;;
+  during-dev|"during dev") env_json='{"value":"Development","child":{"value":"During Dev"}}' ;;
+  */*) env_json="$(jq -n --arg p "${env%%/*}" --arg c "${env#*/}" '{value: $p, child: {value: $c}}')" ;;
+  *) env_json="$(jq -n --arg p "$env" '{value: $p}')" ;;
+esac
+
+to_json_array() { if [[ $# -eq 0 ]]; then echo '[]'; else printf '%s\n' "$@" | jq -R . | jq -s .; fi; }
+labels_json="$(to_json_array ${labels[@]+"${labels[@]}"})"
+
+payload="$(jq \
+  --arg type "$type" \
+  --arg summary "$summary" \
+  --arg description "$description" \
+  --arg severity "$severity" \
+  --arg env "$env_json" \
+  --arg os "$os" \
+  --arg priority "$priority" \
+  --arg parent "$parent" \
+  --argjson labels "$labels_json" '
+  {fields: (.common + .[$type])}
+  | .fields.summary = $summary
+  | .fields.customfield_12515.child = {value: $os}
+  | if $description != "" then .fields.description = $description else . end
+  | if $severity != "" then .fields.customfield_11923.value = $severity else . end
+  | if $env != "" then .fields.customfield_12693 = ($env | fromjson) else . end
+  | if $priority != "" then .fields.priority.name = $priority else . end
+  | if $parent != "" then .fields.parent = {key: $parent} else . end
+  | if ($labels | length) > 0 then .fields.labels = $labels else . end
+  ' "$TEMPLATE")"
+
+if [[ $dry_run -eq 1 ]]; then
+  echo "$payload"
+  exit 0
+fi
+
+: "${JIRA_API_TOKEN:?JIRA_API_TOKEN not set}"
+login="$(awk '/^login:/ {print $2}' "$HOME/.config/.jira/.config.yml")"
+[[ -n "$login" ]] || { echo "No login in ~/.config/.jira/.config.yml" >&2; exit 1; }
+
+api() { curl -sS -w '\n%{http_code}' -u "$login:$JIRA_API_TOKEN" -H 'Content-Type: application/json' "$@"; }
+
+response="$(api -X POST --data "$payload" "$SITE/rest/api/2/issue")"
+status="${response##*$'\n'}"
+body="${response%$'\n'*}"
+
+if [[ "$status" != "201" ]]; then
+  echo "Create failed (HTTP $status):" >&2
+  echo "$body" | jq . >&2 2>/dev/null || echo "$body" >&2
+  exit 1
+fi
+
+key="$(echo "$body" | jq -r .key)"
+url="$SITE/browse/$key"
+
+# Move to Ready to Start: transition IDs vary per workflow, so match on the target status.
+target_status="$(jq -r .initialStatusId "$TEMPLATE")"
+transitions="$(api "$SITE/rest/api/2/issue/$key/transitions")"
+transition_id="$(echo "${transitions%$'\n'*}" | jq -r --arg s "$target_status" \
+  '[.transitions[] | select(.to.id == $s)][0].id // empty')"
+
+if [[ -z "$transition_id" ]]; then
+  echo "Warning: created $key but no transition to status $target_status from its current status" >&2
+else
+  response="$(api -X POST --data "{\"transition\":{\"id\":\"$transition_id\"}}" \
+    "$SITE/rest/api/2/issue/$key/transitions")"
+  [[ "${response##*$'\n'}" == "204" ]] ||
+    echo "Warning: created $key but transition failed: ${response%$'\n'*}" >&2
+fi
+
+echo "$url"

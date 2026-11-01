@@ -104,8 +104,10 @@ swipe_threshold 0\n
 # Gestures:
 gesture swipe left 3 xdotool key ctrl+shift+Tab
 gesture swipe right 3 xdotool key ctrl+Tab
-# gesture swipe left 4 xdotool key ctrl+w
-# gesture swipe right 4 xdotool key ctrl+t
+# 4-finger: switch desktop, swipe direction = target desktop
+# KWin'"'"'s built-in 4-finger swipe is blocked by InputActions
+gesture swipe left 4 xdotool key ctrl+Left
+gesture swipe right 4 xdotool key ctrl+Right
 # These have no effect due to Kwin KDE6 already using these gestures (ARGH!)
 # gesture swipe up 3 xdotool key ctrl+alt+Up
 # gesture swipe down 3 xdotool key ctrl+alt+Down' \
@@ -149,9 +151,10 @@ swipe_threshold 0\n
 # Gestures:
 gesture swipe left 3 ydotool key 29:1 42:1 15:1 15:0 29:0 42:0
 gesture swipe right 3 ydotool key 29:1 15:1 15:0 29:0
-# Disabled since swipe horizontal 4 fingeris is used to change desktop by Kwin
-# gesture swipe left 4 ydotool key 29:1 17:1 17:0 29:0
-# gesture swipe right 4 ydotool key 29:1 20:1 20:0 29:0
+# 4-finger: switch desktop (Ctrl+Left/Right), swipe direction = target desktop
+# KWin'"'"'s built-in 4-finger swipe is blocked by InputActions
+gesture swipe left 4 ydotool key 29:1 105:1 105:0 29:0
+gesture swipe right 4 ydotool key 29:1 106:1 106:0 29:0
 # These have no effect due to Kwin KDE6 already using these gestures (ARGH!)
 # gesture swipe up 3 ydotool key ctrl+alt+Up
 # gesture swipe down 3 ydotool key ctrl+alt+Down' \
@@ -181,7 +184,8 @@ function init_kwin_gestures() {
   # KWin (Plasma 6) hardcodes 3- and 4-finger horizontal swipes to switch
   # virtual desktops. The InputActions KWin plugin blocks the 3-finger one,
   # so libinput-gestures can use 3-finger left/right for tab switching.
-  # 4-finger left/right keeps switching desktops natively.
+  # It also blocks the 4-finger one: libinput-gestures switches desktops
+  # with swipe direction = target desktop (mac-style, inverted from KWin).
   ${PKG_UPDATE}
   ${PKG_INSTALL} curl git cmake g++ extra-cmake-modules qt6-declarative-dev \
     qt6-tools-dev kwin-dev libkf6configwidgets-dev gettext libkf6kcmutils-dev \
@@ -202,6 +206,13 @@ function init_kwin_gestures() {
     # libinput-gestures uses 3-finger left/right for tabs.
     - type: swipe
       fingers: 3
+      direction: left_right
+
+    # Block KWin'"'"'s built-in 4-finger horizontal desktop switch;
+    # libinput-gestures switches desktops with swipe direction = target
+    # desktop (mac-style), inverted from KWin'"'"'s default.
+    - type: swipe
+      fingers: 4
       direction: left_right' \
   > ~/.config/inputactions/config.yaml
 

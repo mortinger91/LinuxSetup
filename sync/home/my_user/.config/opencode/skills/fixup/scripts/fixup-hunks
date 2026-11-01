@@ -1,0 +1,675 @@
+#!/usr/bin/env python3
+"""fixup-hunks: fold working-dir changes into the branch commits they belong to.
+
+Subcommands:
+  range              show base, branch commits (C1..Cn), upstream state
+  list [-U N]        number every hunk (H*) and untracked file (U*), with blame hints
+  execute PLAN       create one UNSIGNED `fixup!` commit per target from a JSON plan
+  check-autosquash   simulate `rebase --autosquash` in memory; report conflicts
+
+Never rebases, pushes, signs, skips hooks, or writes the working tree.
+"""
+
+import argparse
+import hashlib
+import json
+import os
+import re
+import subprocess
+import sys
+from collections import Counter, OrderedDict
+
+ENC = ("utf-8", "surrogateescape")
+FIXUP_PREFIXES = ("fixup! ", "amend! ", "squash! ")
+HUNK_RE = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@(.*)$")
+NO_SIGN = ["-c", "commit.gpgsign=false"]
+
+
+# ---------------------------------------------------------------- git helpers
+
+
+def die(msg, code=1):
+    print(f"fixup-hunks: error: {msg}", file=sys.stderr)
+    sys.exit(code)
+
+
+def run(args, input=None, env=None, check=True):
+    """Run git; return (rc, stdout_str, stderr_str)."""
+    proc = subprocess.run(["git", *args], input=input, capture_output=True, env=env)
+    out = proc.stdout.decode(*ENC)
+    err = proc.stderr.decode(*ENC)
+    if check and proc.returncode != 0:
+        die(f"git {' '.join(args)} failed ({proc.returncode}):\n{err}{out}")
+    return proc.returncode, out, err
+
+
+def git(*args, **kw):
+    return run(list(args), **kw)[1]
+
+
+def git_bytes(*args):
+    proc = subprocess.run(["git", *args], capture_output=True)
+    if proc.returncode != 0:
+        die(f"git {' '.join(args)} failed:\n{proc.stderr.decode(*ENC)}")
+    return proc.stdout
+
+
+def rev_ok(ref):
+    return run(["rev-parse", "--verify", "-q", f"{ref}^{{commit}}"], check=False)[0] == 0
+
+
+def state_path():
+    return git("rev-parse", "--git-path", "fixup-hunks.json").strip()
+
+
+def ensure_no_operation_in_progress():
+    for name in ("rebase-merge", "rebase-apply", "MERGE_HEAD", "CHERRY_PICK_HEAD", "REVERT_HEAD"):
+        if os.path.exists(git("rev-parse", "--git-path", name).strip()):
+            die(f"a git operation is in progress ({name}); finish or abort it first")
+
+
+# ---------------------------------------------------------------- range
+
+
+def detect_base(override):
+    if override:
+        if not rev_ok(override):
+            die(f"--base {override} is not a commit")
+        ref, source = override, "--base"
+    else:
+        ref, source = None, None
+        try:
+            proc = subprocess.run(
+                ["gh", "pr", "view", "--json", "baseRefName", "-q", ".baseRefName"],
+                capture_output=True, timeout=20,
+            )
+            name = proc.stdout.decode().strip() if proc.returncode == 0 else ""
+            for cand in (f"origin/{name}", name) if name else ():
+                if rev_ok(cand):
+                    ref, source = cand, "PR base"
+                    break
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+        if ref is None:
+            rc, out, _ = run(["rev-parse", "--abbrev-ref", "origin/HEAD"], check=False)
+            if rc == 0 and rev_ok(out.strip()):
+                ref, source = out.strip(), "origin/HEAD"
+        if ref is None:
+            for cand in ("origin/master", "origin/main", "master", "main"):
+                if rev_ok(cand):
+                    ref, source = cand, "fallback"
+                    break
+        if ref is None:
+            die("cannot determine base; pass --base <ref>")
+    base = git("merge-base", "HEAD", ref).strip()
+    return base, ref, source
+
+
+def strip_fixup(subject):
+    changed = True
+    while changed:
+        changed = False
+        for prefix in FIXUP_PREFIXES:
+            if subject.startswith(prefix):
+                subject, changed = subject[len(prefix):], True
+    return subject
+
+
+def load_range(base_override=None):
+    head = git("rev-parse", "HEAD").strip()
+    base, ref, source = detect_base(base_override)
+    raw = git("log", "--reverse", "--format=%H%x00%P%x00%s", f"{base}..HEAD")
+    commits = []
+    for line in raw.splitlines():
+        sha, parents, subject = line.split("\x00", 2)
+        commits.append({"sha": sha, "parents": parents.split(), "subject": subject})
+    for index, commit in enumerate(commits, 1):
+        commit["alias"] = f"C{index}"
+        commit["merge"] = len(commit["parents"]) > 1
+    # Redirect fixup!/amend!/squash! commits to the commit they will squash into.
+    for index, commit in enumerate(commits):
+        commit["target"] = commit["sha"]
+        if commit["subject"] == strip_fixup(commit["subject"]):
+            continue
+        wanted = strip_fixup(commit["subject"])
+        commit["target"] = None
+        for earlier in reversed(commits[:index]):
+            if not earlier["merge"] and (
+                earlier["subject"] == wanted or earlier["sha"].startswith(wanted)
+            ) and earlier["subject"] == strip_fixup(earlier["subject"]):
+                commit["target"] = earlier["sha"]
+                break
+    upstream = None
+    rc, out, _ = run(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], check=False)
+    if rc == 0:
+        upstream = {"name": out.strip()}
+        counts = git("rev-list", "--left-right", "--count", "@{u}...HEAD").split()
+        upstream["behind"], upstream["ahead"] = int(counts[0]), int(counts[1])
+        upstream["published"] = bool(commits) and run(
+            ["merge-base", "--is-ancestor", commits[0]["sha"], "@{u}"], check=False
+        )[0] == 0
+    return {"head": head, "base": base, "base_ref": ref, "base_source": source,
+            "commits": commits, "upstream": upstream}
+
+
+def print_range(rng):
+    base_short = rng["base"][:10]
+    print(f"Base: {base_short} (merge-base with {rng['base_ref']}, via {rng['base_source']})")
+    up = rng["upstream"]
+    if up:
+        pub = "published -> force-push needed after squash" if up["published"] else "not published"
+        print(f"Upstream: {up['name']} (ahead {up['ahead']}, behind {up['behind']}; {pub})")
+    else:
+        print("Upstream: none")
+    print("Commits (oldest first):")
+    by_sha = {c["sha"]: c for c in rng["commits"]}
+    for commit in rng["commits"]:
+        note = ""
+        if commit["merge"]:
+            note = "  [merge: not a valid target; dropped by autosquash rebase]"
+        elif commit["target"] is None:
+            note = "  [fixup with no target in range]"
+        elif commit["target"] != commit["sha"]:
+            note = f"  [-> {by_sha[commit['target']]['alias']}]"
+        print(f"  {commit['alias']:>4} {commit['sha'][:10]} {commit['subject']}{note}")
+
+
+def require_commits(rng):
+    if not rng["commits"]:
+        die("no commits between base and HEAD; nothing to fix up (on the base branch?)")
+
+
+# ---------------------------------------------------------------- diff parsing
+
+
+def tracked_paths():
+    out = git("diff", "HEAD", "--name-only", "-z", "--no-renames", "--ignore-submodules=none")
+    return [p for p in out.split("\0") if p]
+
+
+def untracked_paths():
+    out = git("ls-files", "--others", "--exclude-standard", "-z")
+    return [p for p in out.split("\0") if p]
+
+
+def file_diff(path, context):
+    return git("diff", "HEAD", "--no-color", "--no-ext-diff", "--no-textconv", "--no-renames",
+               "--binary", f"-U{context}", "--src-prefix=a/", "--dst-prefix=b/", "--", path)
+
+
+def parse_file(path, text):
+    lines = text.split("\n")
+    if lines and lines[-1] == "":
+        lines.pop()
+    first = next((i for i, l in enumerate(lines) if l.startswith("@@ ")), len(lines))
+    header, body = lines[:first], lines[first:]
+    # New/deleted/binary/mode-change/submodule diffs only move as a whole.
+    whole = (
+        not body
+        or any(l.startswith(("new file mode", "deleted file mode", "old mode", "Binary files",
+                             "GIT binary patch")) for l in header)
+        or any(l[1:].startswith("Subproject commit") for l in body)
+    )
+    if whole:
+        return {"path": path, "header": header, "whole": True, "raw": lines, "hunks": []}
+    hunks = []
+    for line in body:
+        match = HUNK_RE.match(line)
+        if match:
+            hunks.append({
+                "old_start": int(match.group(1)),
+                "old_count": int(match.group(2)) if match.group(2) is not None else 1,
+                "new_start": int(match.group(3)),
+                "new_count": int(match.group(4)) if match.group(4) is not None else 1,
+                "section": match.group(5),
+                "lines": [],
+            })
+        else:
+            hunks[-1]["lines"].append(line)
+    return {"path": path, "header": header, "whole": False, "hunks": hunks}
+
+
+def blame_lines(hunk):
+    """Old (HEAD) line numbers whose blame identifies the commit a hunk modifies."""
+    ptr = hunk["old_start"] if hunk["old_count"] > 0 else hunk["old_start"] + 1
+    wanted, lines = set(), hunk["lines"]
+    for pos, line in enumerate(lines):
+        tag = line[:1]
+        if tag == " ":
+            ptr += 1
+        elif tag == "-":
+            wanted.add(ptr)
+            ptr += 1
+        elif tag == "+":
+            run_start = pos == 0 or lines[pos - 1][:1] != "+"
+            if not run_start:
+                continue
+            end = pos
+            while end < len(lines) and lines[end][:1] in "+\\":
+                end += 1
+            prev_minus = pos > 0 and lines[pos - 1][:1] == "-"
+            next_minus = end < len(lines) and lines[end][:1] == "-"
+            if not (prev_minus or next_minus):
+                wanted.update((ptr - 1, ptr))
+    return wanted
+
+
+def to_ranges(numbers):
+    ranges, nums = [], sorted(numbers)
+    for num in nums:
+        if ranges and num == ranges[-1][1] + 1:
+            ranges[-1][1] = num
+        else:
+            ranges.append([num, num])
+    return ranges
+
+
+def blame(path, numbers, base):
+    rc, content, _ = run(["show", f"HEAD:{path}"], check=False)
+    if rc != 0:
+        return {}
+    total = content.count("\n") + (0 if content.endswith("\n") or not content else 1)
+    numbers = {n for n in numbers if 1 <= n <= total}
+    if not numbers:
+        return {}
+    args = ["blame", "--porcelain"]
+    for lo, hi in to_ranges(numbers):
+        args += ["-L", f"{lo},{hi}"]
+    args += [f"{base}..HEAD", "--", path]
+    rc, out, _ = run(args, check=False)
+    if rc != 0:
+        return {}
+    result = {}
+    for line in out.splitlines():
+        match = re.match(r"^([0-9a-f]{40,64}) \d+ (\d+)", line)
+        if match:
+            result[int(match.group(2))] = match.group(1)
+    return result
+
+
+def commits_touching(path, base):
+    out = git("log", "--format=%H", f"{base}..HEAD", "--", path)
+    return out.split()
+
+
+def fingerprint():
+    digest = hashlib.sha256()
+    digest.update(git("rev-parse", "HEAD").encode())
+    digest.update(git_bytes("diff", "HEAD", "--binary", "--no-renames", "--no-color",
+                            "--no-ext-diff", "--ignore-submodules=none"))
+    paths = untracked_paths()
+    if paths:
+        blobs = git("hash-object", "--stdin-paths", input="\n".join(paths).encode(*ENC))
+        digest.update("\n".join(paths).encode(*ENC))
+        digest.update(blobs.encode())
+    return digest.hexdigest()
+
+
+# ---------------------------------------------------------------- list
+
+
+def cmd_range(args):
+    rng = load_range(args.base)
+    print_range(rng)
+    require_commits(rng)
+
+
+def cmd_list(args):
+    ensure_no_operation_in_progress()
+    rng = load_range(args.base)
+    print_range(rng)
+    require_commits(rng)
+    commits = {c["sha"]: c for c in rng["commits"]}
+
+    def label(sha):
+        commit = commits.get(sha)
+        if commit is None:
+            return "base"
+        target = commits.get(commit["target"]) if commit["target"] else None
+        return target["alias"] if target else commit["alias"]
+
+    items, files = OrderedDict(), []
+    hunk_no = 0
+    for path in tracked_paths():
+        parsed = parse_file(path, file_diff(path, args.context))
+        files.append(parsed)
+        touched = [label(sha) for sha in reversed(commits_touching(path, rng["base"]))]
+        touched = list(OrderedDict.fromkeys(touched))
+        if parsed["whole"]:
+            hunk_no += 1
+            items[f"H{hunk_no}"] = {"kind": "whole", "path": path, "touched": touched}
+            continue
+        for index, hunk in enumerate(parsed["hunks"]):
+            hunk_no += 1
+            hunk["id"], hunk["index"] = f"H{hunk_no}", index
+            owners = blame(path, blame_lines(hunk), rng["base"])
+            tally = Counter(label(sha) for sha in owners.values())
+            items[hunk["id"]] = {"kind": "hunk", "path": path, "index": index,
+                                 "blame": dict(tally), "touched": touched}
+    for number, path in enumerate(untracked_paths(), 1):
+        directory = os.path.dirname(path)
+        touched = []
+        if directory:
+            touched = list(OrderedDict.fromkeys(
+                label(sha) for sha in reversed(commits_touching(directory, rng["base"]))))
+        items[f"U{number}"] = {"kind": "untracked", "path": path, "touched": touched}
+
+    print()
+    if not items:
+        print("No changes in the working dir.")
+        return
+    file_by_path = {f["path"]: f for f in files}
+    for item_id, item in items.items():
+        path = item["path"]
+        if item["kind"] == "untracked":
+            print(f"{item_id:>5}  {path}  [untracked file]")
+            print(f"       dir touched by: {', '.join(item['touched']) or '-'}")
+            preview_untracked(path, args.max_lines)
+        elif item["kind"] == "whole":
+            parsed = file_by_path[path]
+            print(f"{item_id:>5}  {path}  [whole file: new/deleted/binary/mode]")
+            print(f"       file touched by: {', '.join(item['touched']) or '-'}")
+            raw = parsed["raw"]
+            cut = next((n for n, l in enumerate(raw) if l.startswith("GIT binary patch")), None)
+            print_lines(raw if cut is None else raw[:cut] + ["(binary data)"], args.max_lines)
+        else:
+            hunk = file_by_path[path]["hunks"][item["index"]]
+            head = (f"@@ -{hunk['old_start']},{hunk['old_count']} "
+                    f"+{hunk['new_start']},{hunk['new_count']} @@{hunk['section']}")
+            tally = ", ".join(f"{k} x{v}" for k, v in sorted(item["blame"].items())) or "-"
+            print(f"{item_id:>5}  {path}  {head}")
+            print(f"       blame: {tally}   file touched by: {', '.join(item['touched']) or '-'}")
+            print_lines(hunk["lines"], args.max_lines)
+        print()
+
+    state = {"version": 1, "fingerprint": fingerprint(), "context": args.context,
+             "base": rng["base"], "base_ref": rng["base_ref"], "head": rng["head"],
+             "files": files, "items": items}
+    with open(state_path(), "w", encoding="utf-8") as handle:
+        json.dump(state, handle)
+    print(f"{len(items)} item(s). State saved; `execute` refuses to run if anything changes.")
+
+
+def print_lines(lines, limit):
+    for line in lines[:limit]:
+        print(f"       {line}")
+    if len(lines) > limit:
+        print(f"       ... ({len(lines) - limit} more lines; raise --max-lines)")
+
+
+def preview_untracked(path, limit):
+    try:
+        with open(path, "rb") as handle:
+            data = handle.read(200_000)
+    except OSError as exc:
+        print(f"       (unreadable: {exc})")
+        return
+    if b"\0" in data:
+        print(f"       (binary, {os.path.getsize(path)} bytes)")
+        return
+    print_lines(["+" + l for l in data.decode(*ENC).splitlines()], limit)
+
+
+# ---------------------------------------------------------------- execute
+
+
+def hunk_header(old_start, old_count, new_start, new_count, section):
+    return f"@@ -{old_start},{old_count} +{new_start},{new_count} @@{section}"
+
+
+def build_patch(parsed, selected, applied):
+    """Patch for `selected` hunk indexes, positioned against an index that
+    already contains the `applied` hunk indexes of the same file."""
+    if parsed["whole"]:
+        return "\n".join(parsed["raw"]) + "\n"
+    hunks = parsed["hunks"]
+    out = list(parsed["header"])
+    delta_selected = 0
+    for index in sorted(selected):
+        hunk = hunks[index]
+        offset = sum(hunks[i]["new_count"] - hunks[i]["old_count"] for i in applied if i < index)
+        region = hunk["old_start"] if hunk["old_count"] > 0 else hunk["old_start"] + 1
+        region += offset
+        old_start = region if hunk["old_count"] > 0 else region - 1
+        new_region = region + delta_selected
+        new_start = new_region if hunk["new_count"] > 0 else new_region - 1
+        out.append(hunk_header(old_start, hunk["old_count"], new_start, hunk["new_count"],
+                               hunk["section"]))
+        out.extend(hunk["lines"])
+        delta_selected += hunk["new_count"] - hunk["old_count"]
+    return "\n".join(out) + "\n"
+
+
+def is_signed(sha):
+    raw = git("cat-file", "commit", sha)
+    head = raw.split("\n\n", 1)[0]
+    return any(l.startswith(("gpgsig ", "gpgsig-sha256 ")) for l in head.split("\n"))
+
+
+def resolve_target(value, rng):
+    commits = rng["commits"]
+    match = next((c for c in commits if c["alias"].lower() == value.lower()), None)
+    if match is None:
+        rc, out, _ = run(["rev-parse", "--verify", "-q", f"{value}^{{commit}}"], check=False)
+        sha = out.strip() if rc == 0 else None
+        match = next((c for c in commits if c["sha"] == sha), None)
+    if match is None:
+        die(f"target {value!r} is not a commit in base..HEAD")
+    if match["merge"]:
+        die(f"target {value!r} is a merge commit; cannot fix it up")
+    if match["target"] is None:
+        die(f"target {value!r} is a fixup whose original commit is not in range")
+    return next(c for c in commits if c["sha"] == match["target"])
+
+
+def cmd_execute(args):
+    ensure_no_operation_in_progress()
+    try:
+        with open(state_path(), encoding="utf-8") as handle:
+            state = json.load(handle)
+    except FileNotFoundError:
+        die("no saved state; run `list` first")
+    if fingerprint() != state["fingerprint"]:
+        die("HEAD or the working dir changed since `list`; run `list` again")
+    plan_text = sys.stdin.read() if args.plan == "-" else open(args.plan, encoding="utf-8").read()
+    try:
+        plan = json.loads(plan_text)
+    except json.JSONDecodeError as exc:
+        die(f"plan is not valid JSON: {exc}")
+    rng = load_range(state["base"])
+    if rng["base"] != state["base"]:
+        die("base moved since `list`; run `list` again")
+    items = state["items"]
+    unknown = [key for key in plan if key not in items]
+    if unknown:
+        die(f"unknown item id(s) in plan: {', '.join(unknown)}")
+
+    groups, leftovers = OrderedDict(), []
+    for item_id in items:
+        value = plan.get(item_id)
+        if value is None:
+            print(f"warning: {item_id} not in plan; leaving it in the working dir")
+            leftovers.append(item_id)
+            continue
+        if str(value).strip().lower().startswith("leave"):
+            leftovers.append(item_id)
+            continue
+        target = resolve_target(str(value).strip(), rng)
+        groups.setdefault(target["sha"], {"commit": target, "items": []})["items"].append(item_id)
+    order = {c["sha"]: n for n, c in enumerate(rng["commits"])}
+    ordered = sorted(groups.values(), key=lambda g: order[g["commit"]["sha"]])
+
+    if not ordered:
+        print("Nothing assigned to a commit; working dir untouched.")
+        print_leftovers(leftovers, items)
+        return
+
+    orig_head = rng["head"]
+    backup = git("stash", "create").strip()
+    git("update-ref", "refs/fixup-hunks/orig-head", orig_head)
+    if backup:
+        git("update-ref", "refs/fixup-hunks/backup", backup)
+    git("reset", "-q")  # index := HEAD; working tree untouched
+
+    files = {f["path"]: f for f in state["files"]}
+    applied = {path: set() for path in files}
+    created = []
+    env = dict(os.environ, GIT_EDITOR="true")
+    for group in ordered:
+        target = group["commit"]
+        per_file, untracked = OrderedDict(), []
+        for item_id in group["items"]:
+            item = items[item_id]
+            if item["kind"] == "untracked":
+                untracked.append(item["path"])
+            elif item["kind"] == "whole":
+                per_file.setdefault(item["path"], set())
+            else:
+                per_file.setdefault(item["path"], set()).add(item["index"])
+        patch = "".join(build_patch(files[p], sel, applied[p]) for p, sel in per_file.items())
+        if patch:
+            apply_args = ["apply", "--cached", "--whitespace=nowarn"]
+            if state["context"] == 0:
+                apply_args.append("--unidiff-zero")
+            rc, out, err = run(apply_args, input=patch.encode(*ENC), check=False)
+            if rc != 0:
+                git("reset", "-q")
+                fail(f"git apply failed for {target['alias']} ({', '.join(group['items'])}):\n"
+                     f"{err}{out}", created, orig_head)
+        if untracked:
+            git("add", "--", *untracked)
+        rc, out, err = run([*NO_SIGN, "commit", "--no-gpg-sign", f"--fixup={target['sha']}"],
+                           env=env, check=False)
+        if rc != 0:
+            git("reset", "-q")
+            fail(f"commit for {target['alias']} ({', '.join(group['items'])}) failed; hook "
+                 f"output below. If a formatter rewrote files, run `list` again and re-plan "
+                 f"(retry once).\n{out}{err}", created, orig_head, code=3)
+        sha = git("rev-parse", "HEAD").strip()
+        if is_signed(sha):
+            fail(f"fixup commit {sha[:10]} is SIGNED; this must never happen", created + [sha],
+                 orig_head, code=4)
+        for path, sel in per_file.items():
+            applied[path] |= sel
+        created.append(sha)
+        print(f"created {sha[:10]} fixup! -> {target['alias']} {target['sha'][:10]} "
+              f"{target['subject']}  [{', '.join(group['items'])}]")
+
+    unsigned = all(not is_signed(sha) for sha in created)
+    print(f"\nAll {len(created)} fixup commit(s) unsigned: {'yes' if unsigned else 'NO'}")
+    print_leftovers(leftovers, items)
+    print(f"\nUndo: git reset {orig_head[:12]}   (changes return unstaged)")
+    if backup:
+        print(f"Backup of original index+worktree: refs/fixup-hunks/backup ({backup[:12]})")
+    try:
+        os.remove(state_path())
+    except OSError:
+        pass
+    print()
+    if not simulate(load_range(state["base"])):
+        sys.exit(5)
+
+
+def print_leftovers(leftovers, items):
+    if leftovers:
+        print("Left in working dir: " + ", ".join(f"{i} ({items[i]['path']})" for i in leftovers))
+    else:
+        print("Left in working dir: nothing")
+
+
+def fail(msg, created, orig_head, code=2):
+    print(f"fixup-hunks: error: {msg}", file=sys.stderr)
+    if created:
+        print("Fixup commits created before the failure: "
+              + ", ".join(sha[:10] for sha in created), file=sys.stderr)
+    print(f"Index reset to HEAD; working tree untouched by this script. "
+          f"Undo all: git reset {orig_head[:12]}", file=sys.stderr)
+    sys.exit(code)
+
+
+# ---------------------------------------------------------------- autosquash check
+
+
+def simulate(rng):
+    """Replay base..HEAD in autosquash order with in-memory merges."""
+    commits = [c for c in rng["commits"] if not c["merge"]]
+    merges = [c for c in rng["commits"] if c["merge"]]
+    by_sha = {c["sha"]: c for c in commits}
+    fixups = {}
+    picks = []
+    for commit in commits:
+        target = commit["target"]
+        if target and target != commit["sha"] and target in by_sha:
+            fixups.setdefault(target, []).append(commit)
+        else:
+            picks.append(commit)
+    todo = []
+    for commit in picks:
+        todo.append(("pick", commit))
+        todo.extend(("fixup", fix) for fix in fixups.get(commit["sha"], []))
+    pending = sum(len(v) for v in fixups.values())
+    print(f"Autosquash dry run (in memory, nothing touched): {pending} fixup(s) to squash")
+    if merges:
+        print(f"  warning: {len(merges)} merge commit(s) in range would be dropped by the rebase")
+    current = rng["base"]
+    for kind, commit in todo:
+        parent = commit["parents"][0]
+        rc, out, _ = run(["merge-tree", "--write-tree", "--name-only", "--no-messages",
+                          f"--merge-base={parent}", current, commit["sha"]], check=False)
+        if rc not in (0, 1):
+            print(f"  could not simulate at {commit['alias']}: {out}")
+            return False
+        lines = out.split("\n")
+        if rc == 1:
+            conflicted = [l for l in lines[1:] if l][:20]
+            print(f"  CONFLICT at {kind} {commit['alias']} {commit['sha'][:10]} "
+                  f"{commit['subject']}: {', '.join(conflicted)}")
+            return False
+        tree = lines[0].strip()
+        parent_of_new = current if kind == "pick" else git("rev-parse", f"{current}^").strip()
+        current = git(*NO_SIGN, "commit-tree", "--no-gpg-sign", tree, "-p", parent_of_new,
+                      "-m", "fixup-hunks simulation").strip()
+    final = git("rev-parse", f"{current}^{{tree}}").strip()
+    same = final == git("rev-parse", "HEAD^{tree}").strip()
+    print("  clean: every fixup applies to its target"
+          + ("" if same else "; WARNING: final tree differs from HEAD's tree"))
+    dirty = bool(git("status", "--porcelain", "--untracked-files=no").strip())
+    print(f"  next: git rebase -i --autosquash{' --autostash' if dirty else ''} {rng['base'][:12]}")
+    return True
+
+
+def cmd_check(args):
+    rng = load_range(args.base)
+    require_commits(rng)
+    sys.exit(0 if simulate(rng) else 5)
+
+
+# ---------------------------------------------------------------- main
+
+
+def main():
+    sys.stdout.reconfigure(line_buffering=True)
+    top = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True)
+    if top.returncode != 0:
+        die("not inside a git work tree")
+    os.chdir(top.stdout.decode().strip())
+
+    parser = argparse.ArgumentParser(prog="fixup-hunks", description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = parser.add_subparsers(dest="cmd", required=True)
+    for name in ("range", "list", "check-autosquash"):
+        sp = sub.add_parser(name)
+        sp.add_argument("--base", help="base ref (default: PR base, else origin/HEAD)")
+        if name == "list":
+            sp.add_argument("-U", dest="context", type=int, default=3,
+                            help="context lines; -U0 splits hunks as finely as possible")
+            sp.add_argument("--max-lines", type=int, default=80, help="lines shown per item")
+    ex = sub.add_parser("execute")
+    ex.add_argument("plan", help='JSON file (or - for stdin): {"H1": "C2", "U1": "leave"}')
+    args = parser.parse_args()
+    {"range": cmd_range, "list": cmd_list, "execute": cmd_execute,
+     "check-autosquash": cmd_check}[args.cmd](args)
+
+
+if __name__ == "__main__":
+    main()

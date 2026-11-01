@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# rdev — remote dev helper (sync + remote jobs).
+# Bash 3.2 compatible (macOS default). Hardcoded /usr/bin/* for tools
+# because the parent shell's PATH may not propagate to subshells reliably.
+set -uo pipefail
+
+RDEV_ROOT="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/config.sh
+. "$RDEV_ROOT/lib/config.sh"
+# shellcheck source=lib/state.sh
+. "$RDEV_ROOT/lib/state.sh"
+# shellcheck source=lib/transfer.sh
+. "$RDEV_ROOT/lib/transfer.sh"
+# shellcheck source=lib/sync.sh
+. "$RDEV_ROOT/lib/sync.sh"
+# shellcheck source=lib/jobs.sh
+. "$RDEV_ROOT/lib/jobs.sh"
+
+rdev_usage() {
+    cat <<EOF
+Usage: rdev <command> [options]
+
+Commands:
+  sync      Sync local repo to remote machine
+  checkout  Switch the remote repo to origin/<branch> (e.g. master baseline)
+  run       Start a detached job (build, install, tests...) on the remote
+  wait      Wait for a job to finish, riding out ssh outages
+  status    Show one job, or list all jobs
+  log       Tail a job's log
+  stop      Kill a running job
+  get       Copy a file from a job dir back to this machine
+  build     (not implemented, use 'run')
+  watch     Continuous sync on edit   (not yet implemented)
+
+Common options:
+  --machine <windows|debian>   Target machine (required)
+  -h, --help                   Show help (also per command)
+
+Exit codes:
+   0  success
+  10  remote dirty with files not safe to overwrite (no marker, not local)
+  11  local has unpushed commits (use --push or --bundle)
+  12  local branch not on origin
+  14  remote pull --ff-only failed / remote git fetch failed
+  15  remote diverged (HEAD not ancestor of origin/branch)
+  20  ssh failure (after retries)
+  21  local git error / remote command failed
+  22  file transfer failed (after retries)
+  30  usage error
+  40  wait timed out, job still running
+  41  job died without writing an exit code
+  42  job not found
+  43  job already running
+  44  job finished with a non-zero exit code
+EOF
+}
+
+main() {
+    local cmd="${1:-}"
+    [[ $# -gt 0 ]] && shift
+    case "$cmd" in
+        sync)     rdev_sync "$@" ;;
+        checkout) rdev_checkout "$@" ;;
+        run)      rdev_run "$@" ;;
+        wait)     rdev_wait "$@" ;;
+        status)   rdev_status "$@" ;;
+        log)      rdev_log "$@" ;;
+        stop)     rdev_stop "$@" ;;
+        get)      rdev_get "$@" ;;
+        ""|-h|--help|help) rdev_usage ;;
+        build|watch)
+            echo "rdev: '$cmd' is not implemented, use 'rdev run'" >&2; exit 1 ;;
+        *) echo "rdev: unknown command '$cmd'" >&2; rdev_usage >&2; exit 30 ;;
+    esac
+}
+
+main "$@"

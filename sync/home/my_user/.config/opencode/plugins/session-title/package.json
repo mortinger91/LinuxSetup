@@ -1,0 +1,8 @@
+{
+  "name": "session-title-opencode-plugin",
+  "version": "0.1.0",
+  "description": "session_title tool: rename the current opencode session",
+  "type": "module",
+  "main": "plugin.js",
+  "private": true
+}

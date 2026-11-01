@@ -1,0 +1,16 @@
+{
+  "$schema": "https://opencode.ai/tui.json",
+  "scroll_acceleration": { "enabled": true },
+  "plugin": ["./tui-plugins/refreshclaude.js", "./tui-plugins/scroll-boost.js"],
+  "keybinds": {
+    "scrollbar_toggle": "<leader>k",
+    "messages_previous": "ctrl+o",
+    "messages_next": "ctrl+l",
+    "messages_line_up": "up",
+    "messages_line_down": "down",
+    "history_previous": "alt+up",
+    "history_next": "alt+down",
+    "agent_cycle": "ctrl+i",
+    "agent_cycle_reverse": "ctrl+shift+i"
+  }
+}
