@@ -1,0 +1,2 @@
+# This should stop agent from reading this file since it may contain API tokens or other configs which are private
+.zshrc_custom_local

@@ -102,7 +102,7 @@
     "github": {
       "type": "local",
       "command": ["github-mcp-server", "stdio"],
-      "enabled": true,
+      "enabled": false,
       "environment": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "{env:GITHUB_PERSONAL_ACCESS_TOKEN}"
       }
