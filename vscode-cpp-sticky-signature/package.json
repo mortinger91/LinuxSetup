@@ -1,0 +1,27 @@
+{
+    "name": "cpp-sticky-signature",
+    "displayName": "C++ Sticky Signature",
+    "description": "Sticky scroll shows every line of a C++ function signature, also in diffs.",
+    "publisher": "local",
+    "version": "0.0.3",
+    "license": "MIT",
+    "engines": {
+        "vscode": "^1.80.0"
+    },
+    "extensionKind": ["ui"],
+    "activationEvents": ["onLanguage:cpp"],
+    "main": "./extension.js",
+    "contributes": {
+        "configuration": {
+            "title": "C++ Sticky Signature",
+            "properties": {
+                "cppStickySignature.maxLines": {
+                    "type": "integer",
+                    "default": 5,
+                    "minimum": 1,
+                    "description": "Maximum signature lines shown in sticky scroll; the first ones are kept. Also capped by editor.stickyScroll.maxLineCount."
+                }
+            }
+        }
+    }
+}

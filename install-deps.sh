@@ -164,6 +164,13 @@ Signed-By: /etc/apt/keyrings/packages.microsoft.gpg" \
     ${PKG_INSTALL} code
   fi
 
+  echo "Do you want to install vscode cpp sticky extension? (y/n)"
+  read -r answer
+  if [[ "$answer" == [Yy]* ]]; then
+    echo "Installing vscode cpp sticky extension..."
+    code --install-extension vscode-cpp-sticky-signature/cpp-sticky-signature-0.0.3.vsix
+  fi
+
   echo "Do you want to install Google Chrome? (y/n)"
   read -r answer
   if [[ "$answer" == [Yy]* ]]; then
