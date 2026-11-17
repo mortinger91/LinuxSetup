@@ -13,6 +13,11 @@ function update_config() {
     echo "This command should not run as root"
     return
   fi
+  # `update-config deps` only runs install-deps in manual mode (no args)
+  if [ "$1" = "deps" ]; then
+    $CONFIG_DIR/install-deps.sh
+    return
+  fi
   git -C $CONFIG_DIR switch master >/dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo "git switch failed, master branch not found"
