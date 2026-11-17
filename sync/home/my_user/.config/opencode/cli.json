@@ -25,5 +25,8 @@
     "scrollbar": true,
     "thinking": "hide"
   },
-  "animations": true
+  "animations": true,
+  "prompt": {
+    "paste": "full"
+  }
 }

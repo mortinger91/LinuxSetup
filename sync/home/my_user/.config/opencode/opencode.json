@@ -109,9 +109,6 @@
     "auto": false,
     "prune": false
   },
-  "experimental": {
-    "disable_paste_summary": true
-  },
   "lsp": {
     "clangd": {
       "command": ["clangd", "--compile-commands-dir=out/xvn_debug_arm64"]
