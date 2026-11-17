@@ -1,8 +1,0 @@
-{
-  "name": "caveman-opencode-plugin",
-  "version": "0.1.0",
-  "description": "caveman plugin for opencode — terse mode tracking + slash commands",
-  "type": "module",
-  "main": "plugin.js",
-  "private": true
-}

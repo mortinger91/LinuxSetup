@@ -93,9 +93,6 @@
     }
   },
   "agent": {
-    "cavecrew-investigator": { "mode": "subagent" },
-    "cavecrew-builder": { "mode": "subagent" },
-    "cavecrew-reviewer": { "mode": "subagent" },
     "commit": { "mode": "subagent", "hidden": true }
   },
   "mcp": {
@@ -119,10 +116,5 @@
     "clangd": {
       "command": ["clangd", "--compile-commands-dir=out/xvn_debug_arm64"]
     }
-  },
-  "plugin": [
-    "./plugins/caveman/plugin.js",
-    "./plugins/session-title/plugin.js",
-    "opencode-claude-auth@2.2.1"
-  ]
+  }
 }

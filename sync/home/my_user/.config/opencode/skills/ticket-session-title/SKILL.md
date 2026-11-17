@@ -17,13 +17,16 @@ Put the ticket key and name in the session title, then carry on with the actual 
    ```
    Strip leading bracket tags like `[Qt]`. If jira fails, use the PR title (minus the `KDT-XXXX:`
    prefix); if that is missing too, use the key alone.
-3. **Rename** with the `session_title` tool:
+3. **Rename** with OpenCode's built-in `session_rename` tool (Code Mode, inside `execute`), omitting
+   `sessionID` so it renames the current session:
+   ```js
+   await tools.opencode.session_rename({ title: "Implement: KDT-1234 <summary>" })
+   ```
+   Titles:
    - review (ticket, PR, branch): `Review: KDT-1234 Add a CLI command to trigger an app auto-update`
    - do / implement / work on / fix: `Implement: KDT-1234 Add a CLI command to trigger an app auto-update`
    - Multiple tickets: `Implement: KDT-1234, KDT-1240 <first summary>`.
 4. Don't mention the rename unless it failed. Do it once per session; re-run only if the session
    moves on to a different ticket.
 
-If the `session_title` tool isn't available, the `session-title` plugin isn't loaded
-(`~/.config/opencode/plugins/session-title/plugin.js`, listed in `opencode.json` `plugin`): tell
-the user once and continue with the task.
+If the rename fails, tell the user once and continue with the task.
